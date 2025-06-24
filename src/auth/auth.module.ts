@@ -1,15 +1,15 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
-import { SessionModule } from 'src/session/session.module';
-import { UsersModule } from 'src/users/users.module';
+import { Module } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { JwtModule } from '@nestjs/jwt'
+import { SessionModule } from 'src/session/session.module'
+import { UsersModule } from 'src/users/users.module'
 
-import { GoogleStrategy } from './strategies/google.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { LocalStrategy } from './strategies/local.strategy';
-import { RefreshStrategy } from './strategies/refresh.strategy';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { GoogleStrategy } from './strategies/google.strategy'
+import { JwtStrategy } from './strategies/jwt.strategy'
+import { LocalStrategy } from './strategies/local.strategy'
+import { RefreshStrategy } from './strategies/refresh.strategy'
+import { AuthController } from './auth.controller'
+import { AuthService } from './auth.service'
 
 @Module({
   imports: [
@@ -20,7 +20,9 @@ import { AuthService } from './auth.service';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_ACCESS_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_ACCESS_EXPIRES_IN'),
+          expiresIn: configService.get<string>(
+            'JWT_ACCESS_EXPIRES_IN'
+          ),
         },
       }),
       inject: [ConfigService],

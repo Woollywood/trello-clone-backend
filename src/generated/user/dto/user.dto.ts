@@ -1,32 +1,32 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger'
 
 export class UserDto {
   @ApiProperty({
     type: 'string',
   })
-  id: string;
+  id: string
   @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
-  createdAt: Date;
+  createdAt: Date
   @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
-  updatedAt: Date;
+  updatedAt: Date
   @ApiProperty({
     minimum: 3,
     type: 'string',
   })
-  username: string;
+  username: string
   @ApiProperty({
     type: 'string',
   })
-  email: string;
+  email: string
   @ApiProperty({
     minimum: 5,
     type: 'string',
   })
-  password: string;
+  password: string
 }

@@ -1,43 +1,43 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger'
 
 import {
   Session,
   type Session as SessionAsType,
-} from '../../session/entities/session.entity';
+} from '../../session/entities/session.entity'
 
 export class User {
   @ApiProperty({
     type: 'string',
   })
-  id: string;
+  id: string
   @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
-  createdAt: Date;
+  createdAt: Date
   @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
-  updatedAt: Date;
+  updatedAt: Date
   @ApiProperty({
     minimum: 3,
     type: 'string',
   })
-  username: string;
+  username: string
   @ApiProperty({
     type: 'string',
   })
-  email: string;
+  email: string
   @ApiProperty({
     minimum: 5,
     type: 'string',
   })
-  password: string;
+  password: string
   @ApiProperty({
     type: () => Session,
     isArray: true,
     required: false,
   })
-  sessions?: SessionAsType[];
+  sessions?: SessionAsType[]
 }

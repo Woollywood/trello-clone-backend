@@ -2,14 +2,14 @@ import {
   BadRequestException,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from 'src/generated/user/dto/create-user.dto';
-import { SessionService } from 'src/session/session.service';
-import { UsersService } from 'src/users/users.service';
+} from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { JwtService } from '@nestjs/jwt'
+import { CreateUserDto } from 'src/generated/user/dto/create-user.dto'
+import { SessionService } from 'src/session/session.service'
+import { UsersService } from 'src/users/users.service'
 
-import { JwtDto, SignUpDto, TokensDto } from './dto/auth.dto';
+import { JwtDto, SignUpDto, TokensDto } from './dto/auth.dto'
 
 @Injectable()
 export class AuthService {
@@ -17,148 +17,166 @@ export class AuthService {
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly sessionService: SessionService,
+    private readonly sessionService: SessionService
   ) {}
 
   async validateGoogleUser(googleUser: SignUpDto) {
-    const user = await this.userService.findByEmail(googleUser.email);
+    const user = await this.userService.findByEmail(googleUser.email)
 
     if (user) {
-      return user;
+      return user
     }
 
-    return this.userService.createUser(googleUser);
+    return this.userService.createUser(googleUser)
   }
 
-  async validateUser(email: string, password: string): Promise<JwtDto> {
-    const user = await this.userService.findByEmail(email);
+  async validateUser(
+    email: string,
+    password: string
+  ): Promise<JwtDto> {
+    const user = await this.userService.findByEmail(email)
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('User not found')
     }
 
     const isPasswordCorrect = await this.userService.comparePassword(
       password,
-      user.password,
-    );
+      user.password
+    )
 
     if (!isPasswordCorrect) {
-      throw new UnauthorizedException('Incorrect password');
+      throw new UnauthorizedException('Incorrect password')
     }
 
-    return { sub: user.id, username: user.username, email: user.email };
+    return {
+      sub: user.id,
+      username: user.username,
+      email: user.email,
+    }
   }
 
-  async validateJwtUser({ sub, ...rest }: JwtDto, accessToken: string) {
-    const user = await this.userService.findById(sub);
+  async validateJwtUser(
+    { sub, ...rest }: JwtDto,
+    accessToken: string
+  ) {
+    const user = await this.userService.findById(sub)
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('User not found')
     }
 
     const session = await this.sessionService.invalidateSessionToken(
       user.id,
       accessToken,
-      'accessToken',
-    );
+      'accessToken'
+    )
 
     if (!session) {
-      throw new UnauthorizedException('invalid token');
+      throw new UnauthorizedException('invalid token')
     }
 
-    return { sub, ...rest };
+    return { sub, ...rest }
   }
 
-  async validateRefreshToken({ sub, ...rest }: JwtDto, refreshToken: string) {
-    const user = await this.userService.findById(sub);
+  async validateRefreshToken(
+    { sub, ...rest }: JwtDto,
+    refreshToken: string
+  ) {
+    const user = await this.userService.findById(sub)
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('User not found')
     }
 
     const session = await this.sessionService.invalidateSessionToken(
       user.id,
       refreshToken,
-      'refreshToken',
-    );
+      'refreshToken'
+    )
 
     if (!session) {
-      throw new UnauthorizedException('invalid token');
+      throw new UnauthorizedException('invalid token')
     }
 
-    return { sub, ...rest };
+    return { sub, ...rest }
   }
 
   async signUp(createdUserDto: CreateUserDto) {
     const isUsernameExists = await this.userService.findByUsername(
-      createdUserDto.username,
-    );
+      createdUserDto.username
+    )
     if (isUsernameExists) {
-      throw new BadRequestException('This username is already taken');
+      throw new BadRequestException('This username is already taken')
     }
 
     const isEmailExists = await this.userService.findByEmail(
-      createdUserDto.email,
-    );
+      createdUserDto.email
+    )
     if (isEmailExists) {
-      throw new BadRequestException('This email is already taken');
+      throw new BadRequestException('This email is already taken')
     }
 
-    return this.userService.createUser(createdUserDto);
+    return this.userService.createUser(createdUserDto)
   }
 
   async signIn(payload: JwtDto): Promise<TokensDto> {
-    const [accessToken, refreshToken] = await this.generateTokens(payload);
+    const [accessToken, refreshToken] =
+      await this.generateTokens(payload)
     await this.sessionService.createSession(payload.sub, {
       accessToken,
       refreshToken,
-    });
-    return { accessToken, refreshToken };
+    })
+    return { accessToken, refreshToken }
   }
 
   async signOut(userId: string, accessToken: string) {
     const session = await this.sessionService.invalidateSessionToken(
       userId,
       accessToken,
-      'accessToken',
-    );
+      'accessToken'
+    )
     if (!session) {
-      throw new UnauthorizedException('invalid token');
+      throw new UnauthorizedException('invalid token')
     }
 
     const { id } = await this.sessionService.findSessionByToken(
       userId,
       accessToken,
-      'accessToken',
-    );
-    await this.sessionService.revokeSession(id);
+      'accessToken'
+    )
+    await this.sessionService.revokeSession(id)
   }
 
   async refreshToken(
     payload: JwtDto,
-    refreshToken: string,
+    refreshToken: string
   ): Promise<TokensDto> {
-    const hasSession = await this.sessionService.invalidateSessionToken(
-      payload.sub,
-      refreshToken,
-      'refreshToken',
-    );
+    const hasSession =
+      await this.sessionService.invalidateSessionToken(
+        payload.sub,
+        refreshToken,
+        'refreshToken'
+      )
 
     if (!hasSession) {
-      throw new UnauthorizedException('invalid token');
+      throw new UnauthorizedException('invalid token')
     }
 
     const [newAccessToken, newRefreshToken] =
-      await this.generateTokens(payload);
+      await this.generateTokens(payload)
     const session = await this.sessionService.findSessionByToken(
       payload.sub,
       refreshToken,
-      'refreshToken',
-    );
+      'refreshToken'
+    )
     await this.sessionService.updateSessionTokensById(session.id, {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
-    });
-    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+    })
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    }
   }
 
   generateTokens(payload: JwtDto) {
@@ -166,8 +184,10 @@ export class AuthService {
       this.jwtService.signAsync(payload),
       this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
+        expiresIn: this.configService.get<string>(
+          'JWT_REFRESH_EXPIRES_IN'
+        ),
       }),
-    ]);
+    ])
   }
 }

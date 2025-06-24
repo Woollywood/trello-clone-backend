@@ -1,8 +1,8 @@
 // @ts-check
-import eslint from '@eslint/js';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
-import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import eslint from '@eslint/js'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
+import simpleImportSort from 'eslint-plugin-simple-import-sort'
 
 export default tseslint.config(
   {
@@ -50,5 +50,5 @@ export default tseslint.config(
         },
       ],
     },
-  },
-);
+  }
+)

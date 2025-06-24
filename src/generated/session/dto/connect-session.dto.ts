@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger'
+import { IsOptional, IsString } from 'class-validator'
 
 export class ConnectSessionDto {
   @ApiProperty({
@@ -8,19 +8,19 @@ export class ConnectSessionDto {
   })
   @IsOptional()
   @IsString()
-  id?: string;
+  id?: string
   @ApiProperty({
     type: 'string',
     required: false,
   })
   @IsOptional()
   @IsString()
-  accessToken?: string;
+  accessToken?: string
   @ApiProperty({
     type: 'string',
     required: false,
   })
   @IsOptional()
   @IsString()
-  refreshToken?: string;
+  refreshToken?: string
 }

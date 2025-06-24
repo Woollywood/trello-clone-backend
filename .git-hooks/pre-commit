@@ -1,2 +1,2 @@
 #!/bin/sh
-npm run lint:fix && npx tsc --noEmit
+npm run prettier && npm run lint:fix && npx tsc --noEmit
