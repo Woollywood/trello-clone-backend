@@ -15,6 +15,7 @@ import { AuthService } from './auth.service'
   imports: [
     UsersModule,
     SessionModule,
+    UsersModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

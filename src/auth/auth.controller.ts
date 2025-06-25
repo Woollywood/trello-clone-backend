@@ -8,10 +8,11 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { ApiResponse } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import { Response } from 'express'
 import queryString from 'query-string'
 import { User as UserEntity } from 'src/generated/user/entities/user.entity'
+import { UsersService } from 'src/users/users.service'
 
 import { AccessToken } from './decorators/access-token.decorator'
 import { User } from './decorators/user.decorator'
@@ -32,7 +33,8 @@ import { AuthService } from './auth.service'
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly usersService: UsersService
   ) {}
 
   @ApiResponse({ status: 201, type: UserEntity })
@@ -100,5 +102,13 @@ export class AuthController {
       { sub, username, email },
       refreshToken
     )
+  }
+
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, type: UserEntity })
+  @UseGuards(JwtGuard)
+  @Get('identity')
+  identity(@User() { sub }: JwtDto) {
+    return this.usersService.findById(sub)
   }
 }

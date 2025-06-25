@@ -173,6 +173,7 @@ export class AuthService {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     })
+
     return {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
