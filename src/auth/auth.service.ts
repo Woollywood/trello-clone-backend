@@ -40,8 +40,8 @@ export class AuthService {
     }
 
     const isPasswordCorrect = await this.userService.comparePassword(
-      password,
-      user.password
+      user.password,
+      password
     )
 
     if (!isPasswordCorrect) {

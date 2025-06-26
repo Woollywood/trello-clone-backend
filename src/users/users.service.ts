@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service'
 export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  comparePassword(password: string, encryptedPassword: string) {
+  comparePassword(encryptedPassword: string, password: string) {
     return verify(encryptedPassword, password)
   }
 
