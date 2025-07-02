@@ -19,12 +19,12 @@ import { UpdateWorkspaceDto } from 'src/generated/workspace/dto/update-workspace
 import { Workspace } from 'src/generated/workspace/entities/workspace.entity'
 import { UserService } from 'src/user/user.service'
 
+import { ExcludeDto } from './dto/exclude.dto'
 import { InviteDto } from './dto/invite.dto'
 import { PaginatedWorkspaceMembersDto } from './dto/paginated-members.dto'
 import { PaginatedWorkspaceUsersDto } from './dto/paginated-users.dto'
 import { UpdateWorkspaceVisibilityDto } from './dto/update.dto'
 import { WorkspaceService } from './workspace.service'
-import { ExcludeDto } from './dto/exclude.dto'
 
 @UseGuards(JwtGuard)
 @Controller('workspace')

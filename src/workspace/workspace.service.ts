@@ -17,12 +17,12 @@ import { Workspace } from 'src/generated/workspace/entities/workspace.entity'
 import { NotificationService } from 'src/notification/notification.service'
 import { PrismaService } from 'src/prisma/prisma.service'
 
+import { PaginatedWorkspaceUsersDto } from './dto/paginated-users.dto'
+import { WorkspaceUserDto } from './dto/user.dto'
 import {
   WorkspaceAbilityFactory,
   WorkspaceActions,
 } from './workspace-ability.factory'
-import { PaginatedWorkspaceUsersDto } from './dto/paginated-users.dto'
-import { WorkspaceUserDto } from './dto/user.dto'
 
 @Injectable()
 export class WorkspaceService {

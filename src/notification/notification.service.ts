@@ -3,9 +3,8 @@ import { NotificationType } from '@prisma/client'
 import { PageDto } from 'src/common/dto/page.dto'
 import { PageMetaDto } from 'src/common/dto/pageMeta.dto'
 import { PageOptionsDto } from 'src/common/dto/pageOptions.dto'
-import { PrismaService } from 'src/prisma/prisma.service'
-
 import { CreateNotificationDto } from 'src/generated/notification/dto/create-notification.dto'
+import { PrismaService } from 'src/prisma/prisma.service'
 
 @Injectable()
 export class NotificationService {
