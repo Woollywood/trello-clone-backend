@@ -27,7 +27,7 @@ export class RefreshStrategy extends PassportStrategy(
   validate(req: Request, payload: JwtDto) {
     return this.authService.validateRefreshToken(
       payload,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       req.body.refreshToken || ''
     )
   }

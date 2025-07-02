@@ -12,7 +12,7 @@ import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import { Response } from 'express'
 import queryString from 'query-string'
 import { User as UserEntity } from 'src/generated/user/entities/user.entity'
-import { UsersService } from 'src/users/users.service'
+import { UserService } from 'src/user/user.service'
 
 import { AccessToken } from './decorators/access-token.decorator'
 import { User } from './decorators/user.decorator'
@@ -34,7 +34,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
-    private readonly usersService: UsersService
+    private readonly UserService: UserService
   ) {}
 
   @ApiResponse({ status: 201, type: UserEntity })
@@ -109,6 +109,6 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @Get('identity')
   identity(@User() { sub }: JwtDto) {
-    return this.usersService.findById(sub)
+    return this.UserService.findById(sub)
   }
 }

@@ -7,18 +7,41 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { CreateUserDto } from 'src/generated/user/dto/create-user.dto'
 import { SessionService } from 'src/session/session.service'
-import { UsersService } from 'src/users/users.service'
+import { UserService } from 'src/user/user.service'
+import { WorkspaceService } from 'src/workspace/workspace.service'
 
 import { JwtDto, SignUpDto, TokensDto } from './dto/auth.dto'
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UsersService,
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly sessionService: SessionService
+    private readonly sessionService: SessionService,
+    private readonly workspaceService: WorkspaceService
   ) {}
+
+  private generateTokens(payload: JwtDto) {
+    return Promise.all([
+      this.jwtService.signAsync(payload),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get<string>(
+          'JWT_REFRESH_EXPIRES_IN'
+        ),
+      }),
+    ])
+  }
+
+  private async createUser(dto: SignUpDto) {
+    const user = await this.userService.createUser(dto)
+    await this.workspaceService.create(
+      { title: 'Trello workspace' },
+      user.id
+    )
+    return user
+  }
 
   async validateGoogleUser(googleUser: SignUpDto) {
     const user = await this.userService.findByEmail(googleUser.email)
@@ -27,7 +50,7 @@ export class AuthService {
       return user
     }
 
-    return this.userService.createUser(googleUser)
+    return this.createUser(googleUser)
   }
 
   async validateUser(
@@ -116,7 +139,7 @@ export class AuthService {
       throw new BadRequestException('This email is already taken')
     }
 
-    return this.userService.createUser(createdUserDto)
+    return this.createUser(createdUserDto)
   }
 
   async signIn(payload: JwtDto): Promise<TokensDto> {
@@ -151,6 +174,7 @@ export class AuthService {
     payload: JwtDto,
     refreshToken: string
   ): Promise<TokensDto> {
+    console.log('refresh')
     const hasSession =
       await this.sessionService.invalidateSessionToken(
         payload.sub,
@@ -169,6 +193,9 @@ export class AuthService {
       refreshToken,
       'refreshToken'
     )
+
+    console.log({ newAccessToken, newRefreshToken })
+
     await this.sessionService.updateSessionTokensById(session.id, {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
@@ -178,17 +205,5 @@ export class AuthService {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     }
-  }
-
-  generateTokens(payload: JwtDto) {
-    return Promise.all([
-      this.jwtService.signAsync(payload),
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>(
-          'JWT_REFRESH_EXPIRES_IN'
-        ),
-      }),
-    ])
   }
 }

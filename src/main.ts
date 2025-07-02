@@ -6,13 +6,14 @@ import { AppModule } from './app.module'
 import { setupSwagger } from './utils'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    cors: { origin: 'http://localhost:3000', credentials: true },
-  })
+  const app = await NestFactory.create(AppModule)
 
   const configService = app.get(ConfigService)
   const port = configService.get<string>('PORT') ?? 3000
-
+  app.enableCors({
+    origin: configService.get<string>('FRONTEND_URL'),
+    credentials: true,
+  })
   app.setGlobalPrefix('api/v1')
   app.useGlobalPipes(new ValidationPipe())
 

@@ -58,7 +58,12 @@ model User {
   /// @String
   /// @minimum 5
   password String
-  sessions  Session[]
+
+  sessions              Session[]
+  createdWorkspaces     Workspace[]
+  workspacesMembership  WorkspaceMember[]
+  notificationRecipient Notification[]    @relation(name: "recipient")
+  notificationSender    Notification[]    @relation(name: "sender")
 }
 
 model Session {
@@ -78,4 +83,95 @@ model Session {
 
   user   User?   @relation(fields: [userId], references: [id])
   userId String?
+}
+
+model Workspace {
+  /// @DtoReadOnly
+  id String @id @default(uuid())
+
+  /// @DtoReadOnly
+  createdAt DateTime @default(now())
+
+  /// @DtoReadOnly
+  updatedAt DateTime @updatedAt
+
+  /// @String
+  /// @minimum 3
+  title String
+
+  /// @DtoCreateHidden
+  /// @String
+  visibility WorkspaceVisibility
+
+  createBy   User   @relation(fields: [createById], references: [id])
+  createById String
+
+  members      WorkspaceMember[]
+  notification Notification[]
+}
+
+model WorkspaceMember {
+  /// @DtoReadOnly
+  id String @id @default(uuid())
+
+  /// @DtoReadOnly
+  createdAt DateTime @default(now())
+
+  /// @DtoReadOnly
+  updatedAt DateTime @updatedAt
+
+  /// @String
+  permissions WorkspacePermissions[]
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  workspaceId String?
+}
+
+enum WorkspacePermissions {
+  MANAGE
+  READ
+  UPDATE
+  DELETE
+  INVITE
+  EXCLUDE
+}
+
+enum WorkspaceVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+model Notification {
+  /// @DtoReadOnly
+  id String @id @default(uuid())
+
+  /// @DtoReadOnly
+  createdAt DateTime @default(now())
+
+  /// @DtoReadOnly
+  updatedAt DateTime @updatedAt
+
+  /// @DtoReadOnly
+  type NotificationType
+
+  /// @DtoRelationCanConnectOnCreate
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  workspaceId String?
+
+  /// @DtoRelationCanConnectOnCreate
+  recipient   User   @relation(name: "recipient", fields: [recipientId], references: [id])
+  recipientId String
+
+  /// @DtoRelationCanConnectOnCreate
+  sender   User?   @relation(name: "sender", fields: [senderId], references: [id])
+  senderId String?
+
+  @@unique([workspaceId, recipientId])
+}
+
+enum NotificationType {
+  WORKSPACE_INVITATION
 }

@@ -1,10 +1,15 @@
+import { WorkspacePermissions } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   User,
   type User as UserAsType,
 } from '../../user/entities/user.entity'
+import {
+  Workspace,
+  type Workspace as WorkspaceAsType,
+} from '../../workspace/entities/workspace.entity'
 
-export class Session {
+export class WorkspaceMember {
   @ApiProperty({
     type: 'string',
   })
@@ -20,22 +25,29 @@ export class Session {
   })
   updatedAt: Date
   @ApiProperty({
-    type: 'string',
+    isArray: true,
+    enum: WorkspacePermissions,
+    enumName: 'WorkspacePermissions',
   })
-  accessToken: string
-  @ApiProperty({
-    type: 'string',
-  })
-  refreshToken: string
+  permissions: WorkspacePermissions[]
   @ApiProperty({
     type: () => User,
     required: false,
+  })
+  user?: UserAsType
+  @ApiProperty({
+    type: 'string',
+  })
+  userId: string
+  @ApiProperty({
+    type: () => Workspace,
+    required: false,
     nullable: true,
   })
-  user?: UserAsType | null
+  workspace?: WorkspaceAsType | null
   @ApiProperty({
     type: 'string',
     nullable: true,
   })
-  userId: string | null
+  workspaceId: string | null
 }

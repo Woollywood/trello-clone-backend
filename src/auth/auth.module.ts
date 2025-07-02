@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
 import { SessionModule } from 'src/session/session.module'
-import { UsersModule } from 'src/users/users.module'
+import { UserModule } from 'src/user/user.module'
+import { WorkspaceModule } from 'src/workspace/workspace.module'
 
 import { GoogleStrategy } from './strategies/google.strategy'
 import { JwtStrategy } from './strategies/jwt.strategy'
@@ -13,9 +14,9 @@ import { AuthService } from './auth.service'
 
 @Module({
   imports: [
-    UsersModule,
+    UserModule,
     SessionModule,
-    UsersModule,
+    WorkspaceModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

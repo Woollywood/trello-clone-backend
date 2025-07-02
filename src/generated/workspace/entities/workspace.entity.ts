@@ -1,12 +1,9 @@
+import { WorkspaceVisibility } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
 import {
-  Session,
-  type Session as SessionAsType,
-} from '../../session/entities/session.entity'
-import {
-  Workspace,
-  type Workspace as WorkspaceAsType,
-} from '../../workspace/entities/workspace.entity'
+  User,
+  type User as UserAsType,
+} from '../../user/entities/user.entity'
 import {
   WorkspaceMember,
   type WorkspaceMember as WorkspaceMemberAsType,
@@ -16,7 +13,7 @@ import {
   type Notification as NotificationAsType,
 } from '../../notification/entities/notification.entity'
 
-export class User {
+export class Workspace {
   @ApiProperty({
     type: 'string',
   })
@@ -35,44 +32,31 @@ export class User {
     minimum: 3,
     type: 'string',
   })
-  username: string
+  title: string
+  @ApiProperty({
+    enum: WorkspaceVisibility,
+    enumName: 'WorkspaceVisibility',
+  })
+  visibility: WorkspaceVisibility
+  @ApiProperty({
+    type: () => User,
+    required: false,
+  })
+  createBy?: UserAsType
   @ApiProperty({
     type: 'string',
   })
-  email: string
-  @ApiProperty({
-    minimum: 5,
-    type: 'string',
-  })
-  password: string
-  @ApiProperty({
-    type: () => Session,
-    isArray: true,
-    required: false,
-  })
-  sessions?: SessionAsType[]
-  @ApiProperty({
-    type: () => Workspace,
-    isArray: true,
-    required: false,
-  })
-  createdWorkspaces?: WorkspaceAsType[]
+  createById: string
   @ApiProperty({
     type: () => WorkspaceMember,
     isArray: true,
     required: false,
   })
-  workspacesMembership?: WorkspaceMemberAsType[]
+  members?: WorkspaceMemberAsType[]
   @ApiProperty({
     type: () => Notification,
     isArray: true,
     required: false,
   })
-  notificationRecipient?: NotificationAsType[]
-  @ApiProperty({
-    type: () => Notification,
-    isArray: true,
-    required: false,
-  })
-  notificationSender?: NotificationAsType[]
+  notification?: NotificationAsType[]
 }
