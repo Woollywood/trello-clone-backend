@@ -4,6 +4,7 @@ import { IsNotEmpty, IsString } from 'class-validator'
 export class CreateUserDto {
   @ApiProperty({
     minimum: 3,
+    minLength: 3,
     type: 'string',
   })
   @IsNotEmpty()
@@ -17,6 +18,7 @@ export class CreateUserDto {
   email: string
   @ApiProperty({
     minimum: 5,
+    minLength: 5,
     type: 'string',
   })
   @IsNotEmpty()

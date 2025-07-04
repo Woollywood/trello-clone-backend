@@ -1,4 +1,4 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger'
+import { ApiProperty } from '@nestjs/swagger'
 import {
   IsEmail,
   IsNotEmpty,
@@ -6,7 +6,6 @@ import {
   IsUUID,
   MinLength,
 } from 'class-validator'
-import { CreateUserDto } from 'src/generated/user/dto/create-user.dto'
 
 export class JwtDto {
   @ApiProperty()
@@ -39,8 +38,30 @@ export class RefreshTokenDto {
   refreshToken: string
 }
 
-export class SignUpDto extends OmitType(CreateUserDto, ['email']) {
-  @ApiProperty()
+export class SignUpDto {
+  @ApiProperty({
+    minimum: 3,
+    minLength: 3,
+    type: 'string',
+  })
+  @IsNotEmpty()
+  @MinLength(3)
+  @IsString()
+  username: string
+
+  @ApiProperty({
+    minimum: 5,
+    minLength: 5,
+    type: 'string',
+  })
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(5)
+  password: string
+
+  @ApiProperty({
+    type: 'string',
+  })
   @IsNotEmpty()
   @IsString()
   @IsEmail()

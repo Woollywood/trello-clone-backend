@@ -31,6 +31,7 @@ export class Workspace {
   updatedAt: Date
   @ApiProperty({
     minimum: 3,
+    minLength: 3,
     type: 'string',
   })
   title: string

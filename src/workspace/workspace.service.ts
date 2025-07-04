@@ -101,12 +101,8 @@ export class WorkspaceService {
     }
   }
 
-  async listMembers(
-    id: string,
-    pageOptionsDto: PageOptionsDto,
-    search: string
-  ) {
-    const { skip, order, take } = pageOptionsDto
+  async listMembers(id: string, pageOptionsDto: PageOptionsDto) {
+    const { search, skip, order, take } = pageOptionsDto
     const [entities, entitiesCount] = await Promise.all([
       this.prismaService.workspaceMember.findMany({
         include: { user: true },
@@ -140,10 +136,9 @@ export class WorkspaceService {
   async listUsers(
     workspaceId: string,
     currentUserId: string,
-    pageOptionsDto: PageOptionsDto,
-    search: string
+    pageOptionsDto: PageOptionsDto
   ): Promise<PaginatedWorkspaceUsersDto> {
-    const { skip, order, take } = pageOptionsDto
+    const { search, skip, order, take } = pageOptionsDto
     const [rawEntities, entitiesCount] = await Promise.all([
       this.prismaService.user.findMany({
         where: {

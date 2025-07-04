@@ -50,6 +50,7 @@ model User {
 
   /// @String
   /// @minimum 3
+  /// @minLength 3
   username String @unique
 
   /// @String
@@ -57,6 +58,7 @@ model User {
 
   /// @String
   /// @minimum 5
+  /// @minLength 5
   password String
 
   sessions              Session[]
@@ -97,6 +99,7 @@ model Workspace {
 
   /// @String
   /// @minimum 3
+  /// @minLength 3
   title String
 
   /// @DtoCreateHidden

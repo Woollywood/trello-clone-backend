@@ -5,6 +5,7 @@ import { IsEnum, IsOptional, IsString } from 'class-validator'
 export class UpdateWorkspaceDto {
   @ApiProperty({
     minimum: 3,
+    minLength: 3,
     type: 'string',
     required: false,
   })

@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   Param,
   ParseUUIDPipe,
@@ -17,7 +16,6 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard'
 import { PageOptionsDto } from 'src/common/dto/pageOptions.dto'
 import { UpdateWorkspaceDto } from 'src/generated/workspace/dto/update-workspace.dto'
 import { Workspace } from 'src/generated/workspace/entities/workspace.entity'
-import { UserService } from 'src/user/user.service'
 
 import { ExcludeDto } from './dto/exclude.dto'
 import { InviteDto } from './dto/invite.dto'
@@ -29,10 +27,7 @@ import { WorkspaceService } from './workspace.service'
 @UseGuards(JwtGuard)
 @Controller('workspace')
 export class WorkspaceController {
-  constructor(
-    private readonly workspaceService: WorkspaceService,
-    private readonly userService: UserService
-  ) {}
+  constructor(private readonly workspaceService: WorkspaceService) {}
 
   @ApiResponse({ status: 200, type: Workspace })
   @Get(':id')
@@ -57,10 +52,9 @@ export class WorkspaceController {
   @Get(':id/members')
   async listMembers(
     @Param('id', ParseUUIDPipe) id: string,
-    @Query() pageOptions: PageOptionsDto,
-    @Query('search', new DefaultValuePipe('')) search: string
+    @Query() pageOptions: PageOptionsDto
   ) {
-    return this.workspaceService.listMembers(id, pageOptions, search)
+    return this.workspaceService.listMembers(id, pageOptions)
   }
 
   @ApiResponse({ status: 200, type: PaginatedWorkspaceUsersDto })
@@ -68,15 +62,9 @@ export class WorkspaceController {
   async listUsers(
     @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) id: string,
-    @Query() pageOptions: PageOptionsDto,
-    @Query('search', new DefaultValuePipe('')) search: string
+    @Query() pageOptions: PageOptionsDto
   ) {
-    return this.workspaceService.listUsers(
-      id,
-      sub,
-      pageOptions,
-      search
-    )
+    return this.workspaceService.listUsers(id, sub, pageOptions)
   }
 
   @ApiResponse({ status: 200, type: Workspace })

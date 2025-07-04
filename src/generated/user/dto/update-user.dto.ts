@@ -4,6 +4,7 @@ import { IsOptional, IsString } from 'class-validator'
 export class UpdateUserDto {
   @ApiProperty({
     minimum: 3,
+    minLength: 3,
     type: 'string',
     required: false,
   })
@@ -19,6 +20,7 @@ export class UpdateUserDto {
   email?: string
   @ApiProperty({
     minimum: 5,
+    minLength: 5,
     type: 'string',
     required: false,
   })

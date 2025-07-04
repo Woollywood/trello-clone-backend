@@ -34,6 +34,7 @@ export class User {
   updatedAt: Date
   @ApiProperty({
     minimum: 3,
+    minLength: 3,
     type: 'string',
   })
   username: string
@@ -43,6 +44,7 @@ export class User {
   email: string
   @ApiProperty({
     minimum: 5,
+    minLength: 5,
     type: 'string',
   })
   password: string

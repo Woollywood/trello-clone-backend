@@ -11,6 +11,7 @@ export class ConnectUserDto {
   id?: string
   @ApiProperty({
     minimum: 3,
+    minLength: 3,
     type: 'string',
     required: false,
   })

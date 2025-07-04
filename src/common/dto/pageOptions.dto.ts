@@ -1,6 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator'
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator'
 
 import { Order } from '../common.constants'
 
@@ -31,6 +38,12 @@ export class PageOptionsDto {
   @Max(50)
   @IsOptional()
   readonly take?: number = 10
+
+  @ApiPropertyOptional({ default: '' })
+  @Type(() => String)
+  @IsString()
+  @IsOptional()
+  readonly search?: string
 
   get skip(): number {
     // @ts-expect-error default value
