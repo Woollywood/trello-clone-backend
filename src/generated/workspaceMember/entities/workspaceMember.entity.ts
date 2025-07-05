@@ -1,6 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger'
 import { WorkspacePermissions } from '@prisma/client'
-
+import { ApiProperty } from '@nestjs/swagger'
 import {
   User,
   type User as UserAsType,

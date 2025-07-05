@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger'
 import { WorkspacePermissions } from '@prisma/client'
+import { ApiProperty } from '@nestjs/swagger'
 import { IsArray, IsEnum, IsOptional } from 'class-validator'
 
 export class UpdateWorkspaceMemberDto {

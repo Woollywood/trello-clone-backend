@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger'
 import { WorkspacePermissions } from '@prisma/client'
+import { ApiProperty } from '@nestjs/swagger'
 
 export class WorkspaceMemberDto {
   @ApiProperty({

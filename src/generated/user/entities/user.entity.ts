@@ -1,9 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger'
-
-import {
-  Notification,
-  type Notification as NotificationAsType,
-} from '../../notification/entities/notification.entity'
 import {
   Session,
   type Session as SessionAsType,
@@ -16,6 +11,10 @@ import {
   WorkspaceMember,
   type WorkspaceMember as WorkspaceMemberAsType,
 } from '../../workspaceMember/entities/workspaceMember.entity'
+import {
+  Notification,
+  type Notification as NotificationAsType,
+} from '../../notification/entities/notification.entity'
 
 export class User {
   @ApiProperty({
