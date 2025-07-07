@@ -1,5 +1,5 @@
-import { WorkspaceVisibility } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
+import { WorkspaceVisibility } from '@prisma/client'
 import { IsEnum, IsOptional, IsString } from 'class-validator'
 
 export class UpdateWorkspaceDto {
