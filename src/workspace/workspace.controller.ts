@@ -23,6 +23,7 @@ import { PaginatedWorkspaceMembersDto } from './dto/paginated-members.dto'
 import { PaginatedWorkspaceUsersDto } from './dto/paginated-users.dto'
 import { UpdateWorkspaceVisibilityDto } from './dto/update.dto'
 import { WorkspaceService } from './workspace.service'
+import { WorkspaceMember } from 'src/generated/workspaceMember/entities/workspaceMember.entity'
 
 @UseGuards(JwtGuard)
 @Controller('workspace')
@@ -80,7 +81,7 @@ export class WorkspaceController {
   }
 
   @ApiResponse({ status: 200, type: Workspace })
-  @Post(':id/invite')
+  @Post(':id/invitation/invite')
   inviteUser(
     @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) id: string,
@@ -90,12 +91,45 @@ export class WorkspaceController {
   }
 
   @ApiResponse({ status: 200, type: Workspace })
-  @Post(':id/exclude')
+  @Post(':id/invitation/exclude')
   excludeUser(
     @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() { userId }: ExcludeDto
   ) {
     return this.workspaceService.excludeUser(id, sub, userId)
+  }
+
+  @ApiResponse({ status: 201, type: WorkspaceMember })
+  @Post(':id/invitation/accept')
+  acceptInvite(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) workspaceId: string
+  ) {
+    return this.workspaceService.acceptInvite({
+      userId: sub,
+      workspaceId,
+    })
+  }
+
+  @ApiResponse({ status: 200 })
+  @Post(':id/invitation/reject')
+  rejectInvite(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) workspaceId: string
+  ) {
+    return this.workspaceService.rejectInvite({
+      userId: sub,
+      workspaceId,
+    })
+  }
+
+  @ApiResponse({ status: 200, type: WorkspaceMember })
+  @Post(':id/leave')
+  leave(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) workspaceId: string
+  ) {
+    return this.workspaceService.leave(sub, workspaceId)
   }
 }

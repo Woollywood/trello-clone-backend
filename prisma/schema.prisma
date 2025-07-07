@@ -129,14 +129,17 @@ model WorkspaceMember {
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
-  workspaceId String?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+
+  @@unique([userId, workspaceId])
 }
 
 enum WorkspacePermissions {
   MANAGE
   READ
   UPDATE
+  CREATE
   DELETE
   INVITE
   EXCLUDE

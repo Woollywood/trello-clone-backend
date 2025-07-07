@@ -42,12 +42,10 @@ export class WorkspaceMember {
   @ApiProperty({
     type: () => Workspace,
     required: false,
-    nullable: true,
   })
-  workspace?: WorkspaceAsType | null
+  workspace?: WorkspaceAsType
   @ApiProperty({
     type: 'string',
-    nullable: true,
   })
-  workspaceId: string | null
+  workspaceId: string
 }

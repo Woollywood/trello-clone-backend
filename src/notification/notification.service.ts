@@ -25,6 +25,34 @@ export class NotificationService {
     })
   }
 
+  acceptWorkspaceInvite({
+    recipientId,
+    workspaceId,
+  }: {
+    workspaceId: string
+    recipientId: string
+  }) {
+    return this.prismaService.notification.delete({
+      where: {
+        workspaceId_recipientId: { recipientId, workspaceId },
+      },
+    })
+  }
+
+  rejectWorkspaceInvite({
+    recipientId,
+    workspaceId,
+  }: {
+    workspaceId: string
+    recipientId: string
+  }) {
+    return this.prismaService.notification.delete({
+      where: {
+        workspaceId_recipientId: { recipientId, workspaceId },
+      },
+    })
+  }
+
   excludeWorkspaceInvite(dto: {
     workspaceId: string
     recipientId: string

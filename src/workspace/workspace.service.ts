@@ -330,4 +330,48 @@ export class WorkspaceService {
       throw new ForbiddenException()
     }
   }
+
+  async acceptInvite({
+    workspaceId,
+    userId,
+  }: {
+    workspaceId: string
+    userId: string
+  }) {
+    await this.notificationService.acceptWorkspaceInvite({
+      workspaceId,
+      recipientId: userId,
+    })
+    return this.prismaService.workspaceMember.create({
+      data: {
+        userId,
+        workspaceId,
+        permissions: [
+          WorkspacePermissions.INVITE,
+          WorkspacePermissions.READ,
+          WorkspacePermissions.UPDATE,
+          WorkspacePermissions.CREATE,
+        ],
+      },
+    })
+  }
+
+  async rejectInvite({
+    workspaceId,
+    userId,
+  }: {
+    workspaceId: string
+    userId: string
+  }) {
+    await this.notificationService.rejectWorkspaceInvite({
+      workspaceId,
+      recipientId: userId,
+    })
+  }
+
+  async leave(userId: string, workspaceId: string) {
+    return this.prismaService.workspaceMember.delete({
+      where: { userId_workspaceId: { userId, workspaceId } },
+    })
+  }
 }

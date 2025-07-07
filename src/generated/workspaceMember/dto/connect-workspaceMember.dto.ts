@@ -1,11 +1,42 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsString } from 'class-validator'
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger'
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator'
+import { Type } from 'class-transformer'
 
-export class ConnectWorkspaceMemberDto {
+export class WorkspaceMemberUserIdWorkspaceIdUniqueInputDto {
   @ApiProperty({
     type: 'string',
   })
   @IsNotEmpty()
   @IsString()
-  id: string
+  userId: string
+  @ApiProperty({
+    type: 'string',
+  })
+  @IsNotEmpty()
+  @IsString()
+  workspaceId: string
+}
+
+@ApiExtraModels(WorkspaceMemberUserIdWorkspaceIdUniqueInputDto)
+export class ConnectWorkspaceMemberDto {
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  id?: string
+  @ApiProperty({
+    type: WorkspaceMemberUserIdWorkspaceIdUniqueInputDto,
+    required: false,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => WorkspaceMemberUserIdWorkspaceIdUniqueInputDto)
+  userId_workspaceId?: WorkspaceMemberUserIdWorkspaceIdUniqueInputDto
 }
