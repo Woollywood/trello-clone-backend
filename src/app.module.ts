@@ -8,6 +8,7 @@ import { PrismaService } from './prisma/prisma.service'
 import { SessionModule } from './session/session.module'
 import { UserModule } from './user/user.module'
 import { WorkspaceModule } from './workspace/workspace.module'
+import { WsModule } from './ws/ws.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { WorkspaceModule } from './workspace/workspace.module'
     SessionModule,
     WorkspaceModule,
     NotificationModule,
+    WsModule,
   ],
   providers: [PrismaService],
 })

@@ -83,7 +83,7 @@ model Session {
   /// @String
   refreshToken String @unique
 
-  user   User?   @relation(fields: [userId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String?
 }
 
@@ -106,7 +106,7 @@ model Workspace {
   /// @String
   visibility WorkspaceVisibility
 
-  createBy   User   @relation(fields: [createById], references: [id])
+  createBy   User   @relation(fields: [createById], references: [id], onDelete: Cascade)
   createById String
 
   members      WorkspaceMember[]
@@ -126,10 +126,10 @@ model WorkspaceMember {
   /// @String
   permissions WorkspacePermissions[]
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workspaceId String
 
   @@unique([userId, workspaceId])
@@ -142,6 +142,7 @@ enum WorkspacePermissions {
   CREATE
   DELETE
   INVITE
+  EXCLUDE_INVITE
   EXCLUDE
 }
 

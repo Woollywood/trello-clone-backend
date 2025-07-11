@@ -37,6 +37,7 @@ import { AuthService } from './auth.service'
     RefreshStrategy,
     GoogleStrategy,
   ],
+  exports: [AuthService],
   controllers: [AuthController],
 })
 export class AuthModule {}

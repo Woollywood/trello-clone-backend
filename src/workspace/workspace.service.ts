@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
 } from '@nestjs/common'
 import {
@@ -16,6 +18,7 @@ import { UpdateWorkspaceDto } from 'src/generated/workspace/dto/update-workspace
 import { Workspace } from 'src/generated/workspace/entities/workspace.entity'
 import { NotificationService } from 'src/notification/notification.service'
 import { PrismaService } from 'src/prisma/prisma.service'
+import { WsGateway } from 'src/ws/ws.gateway'
 
 import { PaginatedWorkspaceUsersDto } from './dto/paginated-users.dto'
 import { WorkspaceUserDto } from './dto/user.dto'
@@ -29,7 +32,9 @@ export class WorkspaceService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly workspaceAbilityFactory: WorkspaceAbilityFactory,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    @Inject(forwardRef(() => WsGateway))
+    private readonly wsGateway: WsGateway
   ) {}
 
   create(dto: CreateWorkspaceDto, userId: string) {
@@ -101,89 +106,132 @@ export class WorkspaceService {
     }
   }
 
-  async listMembers(id: string, pageOptionsDto: PageOptionsDto) {
-    const { search, skip, order, take } = pageOptionsDto
-    const [entities, entitiesCount] = await Promise.all([
-      this.prismaService.workspaceMember.findMany({
-        include: { user: true },
-        where: {
-          workspaceId: id,
-          user: {
-            username: { contains: search, mode: 'insensitive' },
-          },
-        },
-        skip,
-        orderBy: { createdAt: order },
-        take,
-      }),
-      this.prismaService.workspaceMember.count({
-        where: {
-          workspaceId: id,
-          user: {
-            username: { contains: search, mode: 'insensitive' },
-          },
-        },
-      }),
-    ])
-
-    const pageMetaDto = new PageMetaDto({
-      itemCount: entitiesCount,
-      pageOptionsDto,
+  async listMembers(
+    userId: string,
+    workspaceId: string,
+    pageOptionsDto: PageOptionsDto
+  ) {
+    const workspace = await this.prismaService.workspace.findUnique({
+      where: { id: workspaceId },
     })
-    return new PageDto(entities, pageMetaDto)
+
+    if (!workspace) {
+      throw new BadRequestException()
+    }
+
+    const ability =
+      await this.workspaceAbilityFactory.createForUser(userId)
+    if (
+      ability.can(
+        WorkspaceActions.Read,
+        plainToInstance(Workspace, workspace)
+      )
+    ) {
+      const { search, skip, order, take } = pageOptionsDto
+      const [entities, entitiesCount] = await Promise.all([
+        this.prismaService.workspaceMember.findMany({
+          include: { user: true },
+          where: {
+            workspaceId,
+            user: {
+              username: { contains: search, mode: 'insensitive' },
+            },
+          },
+          skip,
+          orderBy: { createdAt: order },
+          take,
+        }),
+        this.prismaService.workspaceMember.count({
+          where: {
+            workspaceId,
+            user: {
+              username: { contains: search, mode: 'insensitive' },
+            },
+          },
+        }),
+      ])
+
+      const pageMetaDto = new PageMetaDto({
+        itemCount: entitiesCount,
+        pageOptionsDto,
+      })
+      return new PageDto(entities, pageMetaDto)
+    } else {
+      throw new ForbiddenException()
+    }
   }
 
   async listUsers(
-    workspaceId: string,
     currentUserId: string,
+    workspaceId: string,
     pageOptionsDto: PageOptionsDto
   ): Promise<PaginatedWorkspaceUsersDto> {
-    const { search, skip, order, take } = pageOptionsDto
-    const [rawEntities, entitiesCount] = await Promise.all([
-      this.prismaService.user.findMany({
-        where: {
-          id: { not: { equals: currentUserId } },
-          username: { contains: search, mode: 'insensitive' },
-          workspacesMembership: { every: { NOT: { workspaceId } } },
-        },
-        skip,
-        orderBy: { createdAt: order },
-        take,
-      }),
-      this.prismaService.user.count({
-        where: {
-          id: { not: { equals: currentUserId } },
-          username: { contains: search, mode: 'insensitive' },
-          workspacesMembership: { every: { NOT: { workspaceId } } },
-        },
-      }),
-    ])
-
-    const entityIds = rawEntities.map(({ id }) => id)
-    const notifications =
-      await this.prismaService.notification.findMany({
-        where: {
-          workspaceId,
-          recipientId: { in: entityIds },
-        },
-        select: { recipientId: true },
-        distinct: ['recipientId'],
-      })
-
-    const entities: WorkspaceUserDto[] = rawEntities.map(
-      (entity) => ({
-        ...entity,
-        isInvited: notifications.some(
-          ({ recipientId }) => recipientId === entity.id
-        ),
-      })
-    )
-
-    const pageMetaDto = new PageMetaDto({
-      itemCount: entitiesCount,
-      pageOptionsDto,
+    const workspace = await this.prismaService.workspace.findUnique({
+      where: { id: workspaceId },
     })
-    return new PageDto(entities, pageMetaDto)
+
+    if (!workspace) {
+      throw new BadRequestException()
+    }
+
+    const ability =
+      await this.workspaceAbilityFactory.createForUser(currentUserId)
+
+    if (
+      ability.can(
+        WorkspaceActions.Read,
+        plainToInstance(Workspace, workspace)
+      )
+    ) {
+      const { search, skip, order, take } = pageOptionsDto
+      const [rawEntities, entitiesCount] = await Promise.all([
+        this.prismaService.user.findMany({
+          where: {
+            id: { not: { equals: currentUserId } },
+            username: { contains: search, mode: 'insensitive' },
+            workspacesMembership: { every: { NOT: { workspaceId } } },
+          },
+          skip,
+          orderBy: { createdAt: order },
+          take,
+        }),
+        this.prismaService.user.count({
+          where: {
+            id: { not: { equals: currentUserId } },
+            username: { contains: search, mode: 'insensitive' },
+            workspacesMembership: { every: { NOT: { workspaceId } } },
+          },
+        }),
+      ])
+
+      const entityIds = rawEntities.map(({ id }) => id)
+      const notifications =
+        await this.prismaService.notification.findMany({
+          where: {
+            workspaceId,
+            recipientId: { in: entityIds },
+          },
+          select: { recipientId: true },
+          distinct: ['recipientId'],
+        })
+
+      const entities: WorkspaceUserDto[] = rawEntities.map(
+        (entity) => ({
+          ...entity,
+          isInvited: notifications.some(
+            ({ recipientId }) => recipientId === entity.id
+          ),
+        })
+      )
+
+      const pageMetaDto = new PageMetaDto({
+        itemCount: entitiesCount,
+        pageOptionsDto,
+      })
+      return new PageDto(entities, pageMetaDto)
+    } else {
+      throw new ForbiddenException()
+    }
   }
 
   async findListByUserId(
@@ -268,17 +316,22 @@ export class WorkspaceService {
         throw new BadRequestException('user already invited')
       }
 
-      return this.notificationService.sendWorkspaceInvite({
-        recipient: { connect: { id: recipientId } },
-        sender: { connect: { id: senderId } },
-        workspace: { connect: { id: workspaceId } },
-      })
+      const invitation =
+        await this.notificationService.sendWorkspaceInvite({
+          recipient: { connect: { id: recipientId } },
+          sender: { connect: { id: senderId } },
+          workspace: { connect: { id: workspaceId } },
+        })
+
+      this.wsGateway.sendNotification(recipient.id, invitation)
+
+      return invitation
     } else {
       throw new ForbiddenException()
     }
   }
 
-  async excludeUser(
+  async excludeInviteUser(
     workspaceId: string,
     senderId: string,
     recipientId: string
@@ -295,7 +348,7 @@ export class WorkspaceService {
       await this.workspaceAbilityFactory.createForUser(senderId)
     if (
       ability.can(
-        WorkspaceActions.Exclude,
+        WorkspaceActions.ExcludeInvite,
         plainToInstance(Workspace, workspace)
       )
     ) {
@@ -322,10 +375,15 @@ export class WorkspaceService {
         )
       }
 
-      return this.notificationService.excludeWorkspaceInvite({
-        recipientId,
-        workspaceId,
-      })
+      const invitation =
+        await this.notificationService.excludeWorkspaceInvite({
+          recipientId,
+          workspaceId,
+        })
+
+      this.wsGateway.removeNotification(recipient.id, invitation)
+
+      return invitation
     } else {
       throw new ForbiddenException()
     }
@@ -338,22 +396,30 @@ export class WorkspaceService {
     workspaceId: string
     userId: string
   }) {
-    await this.notificationService.acceptWorkspaceInvite({
-      workspaceId,
-      recipientId: userId,
-    })
-    return this.prismaService.workspaceMember.create({
+    const invitation =
+      await this.notificationService.acceptWorkspaceInvite({
+        workspaceId,
+        recipientId: userId,
+      })
+
+    const newMember = this.prismaService.workspaceMember.create({
       data: {
         userId,
         workspaceId,
         permissions: [
           WorkspacePermissions.INVITE,
+          WorkspacePermissions.EXCLUDE_INVITE,
           WorkspacePermissions.READ,
           WorkspacePermissions.UPDATE,
           WorkspacePermissions.CREATE,
         ],
       },
     })
+    this.wsGateway.recipientAction(
+      invitation.senderId ?? '',
+      invitation
+    )
+    return newMember
   }
 
   async rejectInvite({
@@ -363,15 +429,94 @@ export class WorkspaceService {
     workspaceId: string
     userId: string
   }) {
-    await this.notificationService.rejectWorkspaceInvite({
-      workspaceId,
-      recipientId: userId,
+    const invitation =
+      await this.notificationService.rejectWorkspaceInvite({
+        workspaceId,
+        recipientId: userId,
+      })
+    this.wsGateway.recipientAction(
+      invitation.senderId ?? '',
+      invitation
+    )
+  }
+
+  async excludeUser(
+    userId: string,
+    excludeUserId: string,
+    workspaceId: string
+  ) {
+    const workspace = await this.prismaService.workspace.findUnique({
+      where: { id: workspaceId },
     })
+
+    if (!workspace) {
+      throw new BadRequestException()
+    }
+
+    const ability =
+      await this.workspaceAbilityFactory.createForUser(userId)
+    if (
+      ability.can(
+        WorkspaceActions.ExcludeInvite,
+        plainToInstance(Workspace, workspace)
+      )
+    ) {
+      if (workspace.createById === excludeUserId) {
+        throw new BadRequestException('you cannot exclude yourself')
+      }
+
+      return this.prismaService.workspaceMember.delete({
+        where: {
+          userId_workspaceId: { userId: excludeUserId, workspaceId },
+        },
+      })
+    } else {
+      throw new ForbiddenException()
+    }
   }
 
   async leave(userId: string, workspaceId: string) {
-    return this.prismaService.workspaceMember.delete({
+    const workspace = await this.prismaService.workspace.findUnique({
+      where: { id: workspaceId },
+    })
+
+    if (!workspace) {
+      throw new BadRequestException()
+    }
+
+    if (workspace.createById === userId) {
+      throw new BadRequestException(
+        'you cannot leave from your own workspace'
+      )
+    }
+
+    await this.prismaService.workspaceMember.delete({
       where: { userId_workspaceId: { userId, workspaceId } },
     })
+  }
+
+  async deleteWorkspace(userId: string, workspaceId: string) {
+    const workspace = await this.prismaService.workspace.findUnique({
+      where: { id: workspaceId },
+    })
+
+    if (!workspace) {
+      throw new BadRequestException()
+    }
+
+    const ability =
+      await this.workspaceAbilityFactory.createForUser(userId)
+    if (
+      ability.can(
+        WorkspaceActions.Delete,
+        plainToInstance(Workspace, workspace)
+      )
+    ) {
+      return this.prismaService.workspace.delete({
+        where: { id: workspaceId },
+      })
+    } else {
+      throw new ForbiddenException()
+    }
   }
 }

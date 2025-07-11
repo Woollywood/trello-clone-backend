@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -14,6 +16,7 @@ import { User } from 'src/auth/decorators/user.decorator'
 import { JwtDto } from 'src/auth/dto/auth.dto'
 import { JwtGuard } from 'src/auth/guards/jwt.guard'
 import { PageOptionsDto } from 'src/common/dto/pageOptions.dto'
+import { Notification } from 'src/generated/notification/entities/notification.entity'
 import { UpdateWorkspaceDto } from 'src/generated/workspace/dto/update-workspace.dto'
 import { Workspace } from 'src/generated/workspace/entities/workspace.entity'
 import { WorkspaceMember } from 'src/generated/workspaceMember/entities/workspaceMember.entity'
@@ -52,10 +55,13 @@ export class WorkspaceController {
   @ApiResponse({ status: 200, type: PaginatedWorkspaceMembersDto })
   @Get(':id/members')
   async listMembers(
+    @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) id: string,
     @Query() pageOptions: PageOptionsDto
   ) {
-    return this.workspaceService.listMembers(id, pageOptions)
+    console.log('members')
+
+    return this.workspaceService.listMembers(sub, id, pageOptions)
   }
 
   @ApiResponse({ status: 200, type: PaginatedWorkspaceUsersDto })
@@ -65,7 +71,9 @@ export class WorkspaceController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() pageOptions: PageOptionsDto
   ) {
-    return this.workspaceService.listUsers(id, sub, pageOptions)
+    console.log('users')
+
+    return this.workspaceService.listUsers(sub, id, pageOptions)
   }
 
   @ApiResponse({ status: 200, type: Workspace })
@@ -80,7 +88,7 @@ export class WorkspaceController {
     })
   }
 
-  @ApiResponse({ status: 200, type: Workspace })
+  @ApiResponse({ status: 200, type: Notification })
   @Post(':id/invitation/invite')
   inviteUser(
     @User() { sub }: JwtDto,
@@ -90,14 +98,14 @@ export class WorkspaceController {
     return this.workspaceService.inviteUser(id, sub, userId)
   }
 
-  @ApiResponse({ status: 200, type: Workspace })
+  @ApiResponse({ status: 200, type: Notification })
   @Post(':id/invitation/exclude')
-  excludeUser(
+  excludeUserInvitation(
     @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() { userId }: ExcludeDto
   ) {
-    return this.workspaceService.excludeUser(id, sub, userId)
+    return this.workspaceService.excludeInviteUser(id, sub, userId)
   }
 
   @ApiResponse({ status: 201, type: WorkspaceMember })
@@ -125,11 +133,30 @@ export class WorkspaceController {
   }
 
   @ApiResponse({ status: 200, type: WorkspaceMember })
+  @Post(':id/exclude')
+  excludeUser(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() { userId }: ExcludeDto
+  ) {
+    return this.workspaceService.excludeUser(sub, userId, id)
+  }
+
+  @ApiResponse({ status: HttpStatus.OK })
   @Post(':id/leave')
   leave(
     @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) workspaceId: string
   ) {
     return this.workspaceService.leave(sub, workspaceId)
+  }
+
+  @ApiResponse({ status: HttpStatus.OK, type: Workspace })
+  @Delete(':id')
+  delete(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) workspaceId: string
+  ) {
+    return this.workspaceService.deleteWorkspace(sub, workspaceId)
   }
 }

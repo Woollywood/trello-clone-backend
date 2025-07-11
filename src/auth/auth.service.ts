@@ -175,6 +175,7 @@ export class AuthService {
     refreshToken: string
   ): Promise<TokensDto> {
     console.log('refresh')
+
     const hasSession =
       await this.sessionService.invalidateSessionToken(
         payload.sub,
@@ -193,8 +194,6 @@ export class AuthService {
       refreshToken,
       'refreshToken'
     )
-
-    console.log({ newAccessToken, newRefreshToken })
 
     await this.sessionService.updateSessionTokensById(session.id, {
       accessToken: newAccessToken,

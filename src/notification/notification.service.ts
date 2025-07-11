@@ -22,6 +22,17 @@ export class NotificationService {
         sender: { connect: { id: sender?.connect.id } },
         workspace: { connect: { id: workspace?.connect.id } },
       },
+      include: { workspace: true },
+    })
+  }
+
+  excludeWorkspaceInvite(dto: {
+    workspaceId: string
+    recipientId: string
+  }) {
+    return this.prismaService.notification.delete({
+      where: { workspaceId_recipientId: dto },
+      include: { workspace: true },
     })
   }
 
@@ -53,15 +64,6 @@ export class NotificationService {
     })
   }
 
-  excludeWorkspaceInvite(dto: {
-    workspaceId: string
-    recipientId: string
-  }) {
-    return this.prismaService.notification.delete({
-      where: { workspaceId_recipientId: dto },
-    })
-  }
-
   async listNotifications(
     userId: string,
     pageOptionsDto: PageOptionsDto
@@ -85,5 +87,11 @@ export class NotificationService {
       pageOptionsDto,
     })
     return new PageDto(entities, pageMetaDto)
+  }
+
+  countNotifications(userId: string) {
+    return this.prismaService.notification.count({
+      where: { recipientId: userId },
+    })
   }
 }

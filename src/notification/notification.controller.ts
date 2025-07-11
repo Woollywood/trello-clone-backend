@@ -26,4 +26,10 @@ export class NotificationController {
       pageOptions
     )
   }
+
+  @ApiResponse({ status: 200, type: Number })
+  @Get('list/count')
+  async countNotifications(@User() { sub }: JwtDto) {
+    return this.notificationService.countNotifications(sub)
+  }
 }

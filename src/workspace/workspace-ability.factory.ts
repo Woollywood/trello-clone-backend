@@ -21,6 +21,7 @@ export enum WorkspaceActions {
   Update = 'update',
   Delete = 'delete',
   Invite = 'invite',
+  ExcludeInvite = 'excludeInvite',
   Exclude = 'exclude',
 }
 
@@ -91,6 +92,13 @@ export class WorkspaceAbilityFactory {
         id,
         workspacesMembership,
         WorkspacePermissions.INVITE
+      )
+    )
+    can(WorkspaceActions.ExcludeInvite, Workspace, ({ id }) =>
+      hasPermissions(
+        id,
+        workspacesMembership,
+        WorkspacePermissions.EXCLUDE_INVITE
       )
     )
     can(WorkspaceActions.Exclude, Workspace, ({ id }) =>
