@@ -1,7 +1,7 @@
-import { WorkspaceRoles } from '@prisma/client'
+import { BoardRoles } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
 
-export class WorkspaceMemberDto {
+export class BoardMemberDto {
   @ApiProperty({
     type: 'string',
   })
@@ -17,8 +17,8 @@ export class WorkspaceMemberDto {
   })
   updatedAt: Date
   @ApiProperty({
-    enum: WorkspaceRoles,
-    enumName: 'WorkspaceRoles',
+    enum: BoardRoles,
+    enumName: 'BoardRoles',
   })
-  role: WorkspaceRoles
+  role: BoardRoles
 }

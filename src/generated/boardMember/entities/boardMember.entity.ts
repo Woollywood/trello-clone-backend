@@ -1,15 +1,19 @@
-import { WorkspaceRoles } from '@prisma/client'
+import { BoardRoles } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
 import {
   User,
   type User as UserAsType,
 } from '../../user/entities/user.entity'
 import {
-  Workspace,
-  type Workspace as WorkspaceAsType,
-} from '../../workspace/entities/workspace.entity'
+  Board,
+  type Board as BoardAsType,
+} from '../../board/entities/board.entity'
+import {
+  Task,
+  type Task as TaskAsType,
+} from '../../task/entities/task.entity'
 
-export class WorkspaceMember {
+export class BoardMember {
   @ApiProperty({
     type: 'string',
   })
@@ -25,10 +29,10 @@ export class WorkspaceMember {
   })
   updatedAt: Date
   @ApiProperty({
-    enum: WorkspaceRoles,
-    enumName: 'WorkspaceRoles',
+    enum: BoardRoles,
+    enumName: 'BoardRoles',
   })
-  role: WorkspaceRoles
+  role: BoardRoles
   @ApiProperty({
     type: () => User,
     required: false,
@@ -39,12 +43,18 @@ export class WorkspaceMember {
   })
   userId: string
   @ApiProperty({
-    type: () => Workspace,
+    type: () => Board,
     required: false,
   })
-  workspace?: WorkspaceAsType
+  board?: BoardAsType
   @ApiProperty({
     type: 'string',
   })
-  workspaceId: string
+  boardId: string
+  @ApiProperty({
+    type: () => Task,
+    isArray: true,
+    required: false,
+  })
+  tasks?: TaskAsType[]
 }

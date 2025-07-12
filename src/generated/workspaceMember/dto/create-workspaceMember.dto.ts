@@ -1,15 +1,13 @@
+import { WorkspaceRoles } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
-import { WorkspacePermissions } from '@prisma/client'
-import { IsArray, IsEnum, IsNotEmpty } from 'class-validator'
+import { IsEnum, IsNotEmpty } from 'class-validator'
 
 export class CreateWorkspaceMemberDto {
   @ApiProperty({
-    isArray: true,
-    enum: WorkspacePermissions,
-    enumName: 'WorkspacePermissions',
+    enum: WorkspaceRoles,
+    enumName: 'WorkspaceRoles',
   })
   @IsNotEmpty()
-  @IsArray()
-  @IsEnum(WorkspacePermissions, { each: true })
-  permissions: WorkspacePermissions[]
+  @IsEnum(WorkspaceRoles)
+  role: WorkspaceRoles
 }

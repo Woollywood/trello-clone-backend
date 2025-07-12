@@ -1,13 +1,12 @@
-import { WorkspacePermissions } from '@prisma/client'
+import { WorkspaceRoles } from '@prisma/client'
 import { WorkspaceMember } from 'src/generated/workspaceMember/entities/workspaceMember.entity'
 
 export const hasPermissions = (
   id: string,
   membership: WorkspaceMember[],
-  permission: WorkspacePermissions
+  requiredRoles: WorkspaceRoles[]
 ) =>
   membership.some(
-    ({ workspaceId, permissions }) =>
-      workspaceId === id &&
-      permissions.some((value) => value === permission)
+    ({ workspaceId, role }) =>
+      workspaceId === id && requiredRoles.includes(role)
   )

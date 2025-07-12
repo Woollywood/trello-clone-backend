@@ -7,13 +7,15 @@ import { WsModule } from 'src/ws/ws.module'
 import { WorkspaceController } from './workspace.controller'
 import { WorkspaceService } from './workspace.service'
 import { WorkspaceAbilityFactory } from './workspace-ability.factory'
+import { BoardModule } from 'src/board/board.module'
 
 @Module({
   imports: [
     PrismaModule,
-    forwardRef(() => UserModule),
     NotificationModule,
+    forwardRef(() => UserModule),
     forwardRef(() => WsModule),
+    forwardRef(() => BoardModule),
   ],
   controllers: [WorkspaceController],
   providers: [WorkspaceService, WorkspaceAbilityFactory],

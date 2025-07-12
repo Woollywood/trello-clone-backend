@@ -7,7 +7,7 @@ import {
 } from 'class-validator'
 import { Type } from 'class-transformer'
 
-export class WorkspaceMemberUserIdWorkspaceIdUniqueInputDto {
+export class BoardMemberUserIdBoardIdUniqueInputDto {
   @ApiProperty({
     type: 'string',
   })
@@ -19,11 +19,11 @@ export class WorkspaceMemberUserIdWorkspaceIdUniqueInputDto {
   })
   @IsNotEmpty()
   @IsString()
-  workspaceId: string
+  boardId: string
 }
 
-@ApiExtraModels(WorkspaceMemberUserIdWorkspaceIdUniqueInputDto)
-export class ConnectWorkspaceMemberDto {
+@ApiExtraModels(BoardMemberUserIdBoardIdUniqueInputDto)
+export class ConnectBoardMemberDto {
   @ApiProperty({
     type: 'string',
     required: false,
@@ -32,11 +32,11 @@ export class ConnectWorkspaceMemberDto {
   @IsString()
   id?: string
   @ApiProperty({
-    type: WorkspaceMemberUserIdWorkspaceIdUniqueInputDto,
+    type: BoardMemberUserIdBoardIdUniqueInputDto,
     required: false,
   })
   @IsOptional()
   @ValidateNested()
-  @Type(() => WorkspaceMemberUserIdWorkspaceIdUniqueInputDto)
-  userId_workspaceId?: WorkspaceMemberUserIdWorkspaceIdUniqueInputDto
+  @Type(() => BoardMemberUserIdBoardIdUniqueInputDto)
+  userId_boardId?: BoardMemberUserIdBoardIdUniqueInputDto
 }

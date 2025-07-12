@@ -1,11 +1,11 @@
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger'
-import { Type } from 'class-transformer'
 import {
   IsNotEmpty,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator'
+import { Type } from 'class-transformer'
 
 export class NotificationWorkspaceIdRecipientIdUniqueInputDto {
   @ApiProperty({

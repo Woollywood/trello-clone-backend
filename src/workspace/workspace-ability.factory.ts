@@ -5,10 +5,7 @@ import {
   PureAbility,
 } from '@casl/ability'
 import { BadRequestException, Injectable } from '@nestjs/common'
-import {
-  WorkspacePermissions,
-  WorkspaceVisibility,
-} from '@prisma/client'
+import { WorkspaceRoles, WorkspaceVisibility } from '@prisma/client'
 import { Workspace } from 'src/generated/workspace/entities/workspace.entity'
 import { PrismaService } from 'src/prisma/prisma.service'
 
@@ -16,13 +13,15 @@ import { hasPermissions } from './helpers'
 
 export enum WorkspaceActions {
   Manage = 'manage',
-  Create = 'create',
   Read = 'read',
   Update = 'update',
   Delete = 'delete',
   Invite = 'invite',
   ExcludeInvite = 'excludeInvite',
-  Exclude = 'exclude',
+  ExcludeUser = 'exclude',
+  CreateBoard = 'createBoard',
+  UpdateBoard = 'updateBoard',
+  DeleteBoard = 'deleteBoard',
 }
 
 type WorkspaceAbility = PureAbility<AbilityTuple, MatchConditions>
@@ -36,7 +35,7 @@ export class WorkspaceAbilityFactory {
   async createForUser(userId: string) {
     const user = await this.prismaService.user.findUnique({
       where: { id: userId },
-      include: { workspacesMembership: true },
+      include: { workspacesMemberships: true },
     })
 
     if (!user) {
@@ -47,66 +46,75 @@ export class WorkspaceAbilityFactory {
       PureAbility
     )
 
-    const { workspacesMembership } = user
+    const { workspacesMemberships } = user
 
     can(
       WorkspaceActions.Manage,
       Workspace,
       ({ id, createBy }) =>
         createBy?.id === user.id ||
-        hasPermissions(
-          id,
-          workspacesMembership,
-          WorkspacePermissions.MANAGE
-        )
+        hasPermissions(id, workspacesMemberships, [
+          WorkspaceRoles.ADMIN,
+        ])
     )
     can(WorkspaceActions.Read, Workspace, ({ id, visibility }) => {
       switch (visibility) {
         case WorkspaceVisibility.PUBLIC:
           return true
         case WorkspaceVisibility.PRIVATE: {
-          return hasPermissions(
-            id,
-            workspacesMembership,
-            WorkspacePermissions.READ
-          )
+          return hasPermissions(id, workspacesMemberships, [
+            WorkspaceRoles.ADMIN,
+            WorkspaceRoles.VIEWER,
+            WorkspaceRoles.PARTICIPANT,
+          ])
         }
       }
     })
     can(WorkspaceActions.Update, Workspace, ({ id }) =>
-      hasPermissions(
-        id,
-        workspacesMembership,
-        WorkspacePermissions.UPDATE
-      )
+      hasPermissions(id, workspacesMemberships, [
+        WorkspaceRoles.ADMIN,
+        WorkspaceRoles.PARTICIPANT,
+      ])
     )
     can(WorkspaceActions.Delete, Workspace, ({ id }) =>
-      hasPermissions(
-        id,
-        workspacesMembership,
-        WorkspacePermissions.DELETE
-      )
+      hasPermissions(id, workspacesMemberships, [
+        WorkspaceRoles.ADMIN,
+      ])
     )
     can(WorkspaceActions.Invite, Workspace, ({ id }) =>
-      hasPermissions(
-        id,
-        workspacesMembership,
-        WorkspacePermissions.INVITE
-      )
+      hasPermissions(id, workspacesMemberships, [
+        WorkspaceRoles.ADMIN,
+        WorkspaceRoles.PARTICIPANT,
+      ])
     )
     can(WorkspaceActions.ExcludeInvite, Workspace, ({ id }) =>
-      hasPermissions(
-        id,
-        workspacesMembership,
-        WorkspacePermissions.EXCLUDE_INVITE
-      )
+      hasPermissions(id, workspacesMemberships, [
+        WorkspaceRoles.ADMIN,
+        WorkspaceRoles.PARTICIPANT,
+      ])
     )
-    can(WorkspaceActions.Exclude, Workspace, ({ id }) =>
-      hasPermissions(
-        id,
-        workspacesMembership,
-        WorkspacePermissions.EXCLUDE
-      )
+    can(WorkspaceActions.ExcludeUser, Workspace, ({ id }) =>
+      hasPermissions(id, workspacesMemberships, [
+        WorkspaceRoles.ADMIN,
+      ])
+    )
+    can(WorkspaceActions.CreateBoard, Workspace, ({ id }) =>
+      hasPermissions(id, workspacesMemberships, [
+        WorkspaceRoles.ADMIN,
+        WorkspaceRoles.PARTICIPANT,
+      ])
+    )
+    can(WorkspaceActions.UpdateBoard, Workspace, ({ id }) =>
+      hasPermissions(id, workspacesMemberships, [
+        WorkspaceRoles.ADMIN,
+        WorkspaceRoles.PARTICIPANT,
+      ])
+    )
+    can(WorkspaceActions.DeleteBoard, Workspace, ({ id }) =>
+      hasPermissions(id, workspacesMemberships, [
+        WorkspaceRoles.ADMIN,
+        WorkspaceRoles.PARTICIPANT,
+      ])
     )
 
     return build({ conditionsMatcher: lambdaMatcher })

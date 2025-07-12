@@ -1,15 +1,10 @@
-import {
-  Body,
-  Controller,
-  DefaultValuePipe,
-  Get,
-  Query,
-  UseGuards,
-} from '@nestjs/common'
+import { Controller, Get, Query, UseGuards } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import { User } from 'src/auth/decorators/user.decorator'
 import { JwtDto } from 'src/auth/dto/auth.dto'
 import { JwtGuard } from 'src/auth/guards/jwt.guard'
+import { BoardService } from 'src/board/board.service'
+import { PaginatedBoardsDto } from 'src/board/dto/paginated-boards.dto'
 import { PageOptionsDto } from 'src/common/dto/pageOptions.dto'
 import { PaginatedWorkspaceDto } from 'src/workspace/dto/paginated-workspace.dto'
 import { WorkspaceService } from 'src/workspace/workspace.service'
@@ -22,29 +17,43 @@ import { UserService } from './user.service'
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly workspaceService: WorkspaceService
+    private readonly workspaceService: WorkspaceService,
+    private readonly boardService: BoardService
   ) {}
 
   @ApiResponse({ status: 200, type: PaginatedUsersDto })
   @Get('list')
-  async listUsers(
-    @Query() pageOptions: PageOptionsDto,
-    @Query('search', new DefaultValuePipe('')) search: string
-  ) {
-    return this.userService.listUsers(pageOptions, search)
+  listUsers(@Query() pageOptions: PageOptionsDto) {
+    return this.userService.listUsers(pageOptions)
   }
 
   @ApiResponse({ status: 200, type: PaginatedWorkspaceDto })
   @Get('workspaces')
-  async findWorkSpaces(
+  findWorkSpaces(
     @User() { sub }: JwtDto,
-    @Query() pageOptions: PageOptionsDto,
-    @Query('search', new DefaultValuePipe('')) search: string
+    @Query() pageOptions: PageOptionsDto
   ) {
-    return this.workspaceService.findListByUserId(
+    return this.workspaceService.findListByUserId(sub, pageOptions)
+  }
+
+  @ApiResponse({ status: 200, type: PaginatedWorkspaceDto })
+  @Get('workspaces/boards')
+  listWorkspaceBoards(
+    @User() { sub }: JwtDto,
+    @Query() pageOptions: PageOptionsDto
+  ) {
+    return this.workspaceService.findListByUserIdWithBoards(
       sub,
-      pageOptions,
-      search
+      pageOptions
     )
+  }
+
+  @ApiResponse({ status: 200, type: PaginatedBoardsDto })
+  @Get('boards')
+  listBoards(
+    @User() { sub }: JwtDto,
+    @Query() pageOptions: PageOptionsDto
+  ) {
+    return this.boardService.getUserBoards(sub, pageOptions)
   }
 }

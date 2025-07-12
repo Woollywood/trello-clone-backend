@@ -6,13 +6,15 @@ import {
   Injectable,
 } from '@nestjs/common'
 import {
-  WorkspacePermissions,
+  BoardRoles,
+  WorkspaceRoles,
   WorkspaceVisibility,
 } from '@prisma/client'
 import { plainToInstance } from 'class-transformer'
 import { PageDto } from 'src/common/dto/page.dto'
 import { PageMetaDto } from 'src/common/dto/pageMeta.dto'
 import { PageOptionsDto } from 'src/common/dto/pageOptions.dto'
+import { CreateBoardDto } from 'src/generated/board/dto/create-board.dto'
 import { CreateWorkspaceDto } from 'src/generated/workspace/dto/create-workspace.dto'
 import { UpdateWorkspaceDto } from 'src/generated/workspace/dto/update-workspace.dto'
 import { Workspace } from 'src/generated/workspace/entities/workspace.entity'
@@ -45,12 +47,48 @@ export class WorkspaceService {
         members: {
           create: {
             userId,
-            permissions: [WorkspacePermissions.MANAGE],
+            role: WorkspaceRoles.ADMIN,
           },
         },
         createBy: { connect: { id: userId } },
       },
     })
+  }
+
+  async createBoard(
+    userId: string,
+    workspaceId: string,
+    dto: CreateBoardDto
+  ) {
+    const workspace = await this.prismaService.workspace.findUnique({
+      where: { id: workspaceId },
+    })
+
+    if (!workspace) {
+      throw new BadRequestException()
+    }
+
+    const ability =
+      await this.workspaceAbilityFactory.createForUser(userId)
+    if (
+      ability.can(
+        WorkspaceActions.CreateBoard,
+        plainToInstance(Workspace, workspace)
+      )
+    ) {
+      return this.prismaService.board.create({
+        data: {
+          ...dto,
+          createBy: { connect: { id: userId } },
+          workspace: { connect: { id: workspaceId } },
+          boardMembers: {
+            create: { userId, role: BoardRoles.ADMIN },
+          },
+        },
+      })
+    } else {
+      throw new ForbiddenException()
+    }
   }
 
   async findItemById(userId: string, workspaceId: string) {
@@ -189,7 +227,9 @@ export class WorkspaceService {
           where: {
             id: { not: { equals: currentUserId } },
             username: { contains: search, mode: 'insensitive' },
-            workspacesMembership: { every: { NOT: { workspaceId } } },
+            workspacesMemberships: {
+              every: { NOT: { workspaceId } },
+            },
           },
           skip,
           orderBy: { createdAt: order },
@@ -199,7 +239,9 @@ export class WorkspaceService {
           where: {
             id: { not: { equals: currentUserId } },
             username: { contains: search, mode: 'insensitive' },
-            workspacesMembership: { every: { NOT: { workspaceId } } },
+            workspacesMemberships: {
+              every: { NOT: { workspaceId } },
+            },
           },
         }),
       ])
@@ -236,10 +278,9 @@ export class WorkspaceService {
 
   async findListByUserId(
     userId: string,
-    pageOptionsDto: PageOptionsDto,
-    search: string
+    pageOptionsDto: PageOptionsDto
   ) {
-    const { skip, order, take } = pageOptionsDto
+    const { search, skip, order, take } = pageOptionsDto
     const [entities, entitiesCount] = await Promise.all([
       this.prismaService.workspace.findMany({
         where: {
@@ -249,6 +290,37 @@ export class WorkspaceService {
         skip,
         orderBy: { createdAt: order },
         take,
+      }),
+      this.prismaService.workspace.count({
+        where: {
+          title: { contains: search, mode: 'insensitive' },
+          members: { some: { userId } },
+        },
+      }),
+    ])
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount: entitiesCount,
+      pageOptionsDto,
+    })
+    return new PageDto(entities, pageMetaDto)
+  }
+
+  async findListByUserIdWithBoards(
+    userId: string,
+    pageOptionsDto: PageOptionsDto
+  ) {
+    const { search, skip, order, take } = pageOptionsDto
+    const [entities, entitiesCount] = await Promise.all([
+      this.prismaService.workspace.findMany({
+        where: {
+          title: { contains: search, mode: 'insensitive' },
+          members: { some: { userId } },
+        },
+        skip,
+        orderBy: { createdAt: order },
+        take,
+        include: { boards: true },
       }),
       this.prismaService.workspace.count({
         where: {
@@ -288,16 +360,16 @@ export class WorkspaceService {
     ) {
       const recipient = await this.prismaService.user.findUnique({
         where: { id: recipientId },
-        include: { workspacesMembership: true },
+        include: { workspacesMemberships: true },
       })
 
       if (!recipient) {
         throw new BadRequestException('recipient not found')
       }
 
-      const { workspacesMembership } = recipient
+      const { workspacesMemberships } = recipient
       if (
-        workspacesMembership.some(
+        workspacesMemberships.some(
           (item) => item.workspaceId === workspaceId
         )
       ) {
@@ -354,7 +426,7 @@ export class WorkspaceService {
     ) {
       const recipient = await this.prismaService.user.findUnique({
         where: { id: recipientId },
-        include: { workspacesMembership: true },
+        include: { workspacesMemberships: true },
       })
 
       if (!recipient) {
@@ -406,13 +478,7 @@ export class WorkspaceService {
       data: {
         userId,
         workspaceId,
-        permissions: [
-          WorkspacePermissions.INVITE,
-          WorkspacePermissions.EXCLUDE_INVITE,
-          WorkspacePermissions.READ,
-          WorkspacePermissions.UPDATE,
-          WorkspacePermissions.CREATE,
-        ],
+        role: WorkspaceRoles.PARTICIPANT,
       },
     })
     this.wsGateway.recipientAction(
@@ -478,6 +544,7 @@ export class WorkspaceService {
   async leave(userId: string, workspaceId: string) {
     const workspace = await this.prismaService.workspace.findUnique({
       where: { id: workspaceId },
+      include: { boards: { include: { boardMembers: true } } },
     })
 
     if (!workspace) {
@@ -489,6 +556,13 @@ export class WorkspaceService {
         'you cannot leave from your own workspace'
       )
     }
+
+    await this.prismaService.boardMember.deleteMany({
+      where: {
+        userId,
+        board: { boardMembers: { some: { userId } } },
+      },
+    })
 
     await this.prismaService.workspaceMember.delete({
       where: { userId_workspaceId: { userId, workspaceId } },

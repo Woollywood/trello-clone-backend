@@ -63,7 +63,9 @@ model User {
 
   sessions              Session[]
   createdWorkspaces     Workspace[]
-  workspacesMembership  WorkspaceMember[]
+  createdBoards         Board[]
+  workspacesMemberships WorkspaceMember[]
+  boardMemberships      BoardMember[]
   notificationRecipient Notification[]    @relation(name: "recipient")
   notificationSender    Notification[]    @relation(name: "sender")
 }
@@ -109,8 +111,9 @@ model Workspace {
   createBy   User   @relation(fields: [createById], references: [id], onDelete: Cascade)
   createById String
 
-  members      WorkspaceMember[]
-  notification Notification[]
+  members       WorkspaceMember[]
+  notifications Notification[]
+  boards        Board[]
 }
 
 model WorkspaceMember {
@@ -124,7 +127,7 @@ model WorkspaceMember {
   updatedAt DateTime @updatedAt
 
   /// @String
-  permissions WorkspacePermissions[]
+  role WorkspaceRoles
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
@@ -133,22 +136,6 @@ model WorkspaceMember {
   workspaceId String
 
   @@unique([userId, workspaceId])
-}
-
-enum WorkspacePermissions {
-  MANAGE
-  READ
-  UPDATE
-  CREATE
-  DELETE
-  INVITE
-  EXCLUDE_INVITE
-  EXCLUDE
-}
-
-enum WorkspaceVisibility {
-  PRIVATE
-  PUBLIC
 }
 
 model Notification {
@@ -177,6 +164,116 @@ model Notification {
   senderId String?
 
   @@unique([workspaceId, recipientId])
+}
+
+model Board {
+  /// @DtoReadOnly
+  id String @id @default(uuid())
+
+  /// @DtoReadOnly
+  createdAt DateTime @default(now())
+
+  /// @DtoReadOnly
+  updatedAt DateTime @updatedAt
+
+  /// @String
+  visibility BoardVisibility
+
+  /// @String
+  title String
+
+  createBy   User   @relation(fields: [createById], references: [id], onDelete: Cascade)
+  createById String
+
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String?
+
+  boardMembers BoardMember[]
+  boardColumns BoardColumn[]
+}
+
+model BoardMember {
+  /// @DtoReadOnly
+  id String @id @default(uuid())
+
+  /// @DtoReadOnly
+  createdAt DateTime @default(now())
+
+  /// @DtoReadOnly
+  updatedAt DateTime @updatedAt
+
+  /// @String
+  role BoardRoles
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId String
+
+  tasks Task[]
+
+  @@unique([userId, boardId])
+}
+
+model BoardColumn {
+  /// @DtoReadOnly
+  id String @id @default(uuid())
+
+  /// @DtoReadOnly
+  createdAt DateTime @default(now())
+
+  /// @DtoReadOnly
+  updatedAt DateTime @updatedAt
+
+  title String
+
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId String
+
+  tasks Task[]
+}
+
+model Task {
+  /// @DtoReadOnly
+  id String @id @default(uuid())
+
+  /// @DtoReadOnly
+  createdAt DateTime @default(now())
+
+  /// @DtoReadOnly
+  updatedAt DateTime @updatedAt
+
+  title       String
+  description String?
+
+  column        BoardColumn @relation(fields: [boardColumnId], references: [id], onDelete: Cascade)
+  boardColumnId String
+
+  participants BoardMember[]
+}
+
+enum BoardRoles {
+  ADMIN
+  PARTICIPANT
+  VIEWER
+}
+
+enum WorkspaceRoles {
+  ADMIN
+  PARTICIPANT
+  VIEWER
+}
+
+enum WorkspaceVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum BoardVisibility {
+  PRIVATE
+  WORKSPACE
+  PUBLIC
 }
 
 enum NotificationType {

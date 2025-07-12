@@ -1,16 +1,14 @@
+import { WorkspaceRoles } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
-import { WorkspacePermissions } from '@prisma/client'
-import { IsArray, IsEnum, IsOptional } from 'class-validator'
+import { IsEnum, IsOptional } from 'class-validator'
 
 export class UpdateWorkspaceMemberDto {
   @ApiProperty({
-    isArray: true,
-    enum: WorkspacePermissions,
-    enumName: 'WorkspacePermissions',
+    enum: WorkspaceRoles,
+    enumName: 'WorkspaceRoles',
     required: false,
   })
   @IsOptional()
-  @IsArray()
-  @IsEnum(WorkspacePermissions, { each: true })
-  permissions?: WorkspacePermissions[]
+  @IsEnum(WorkspaceRoles)
+  role?: WorkspaceRoles
 }

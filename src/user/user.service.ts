@@ -14,8 +14,8 @@ export class UserService {
     return verify(encryptedPassword, password)
   }
 
-  async listUsers(pageOptionsDto: PageOptionsDto, search: string) {
-    const { skip, order, take } = pageOptionsDto
+  async listUsers(pageOptionsDto: PageOptionsDto) {
+    const { search, skip, order, take } = pageOptionsDto
     const [entities, entitiesCount] = await Promise.all([
       this.prismaService.user.findMany({
         where: {

@@ -1,9 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger'
-
-import {
-  Notification,
-  type Notification as NotificationAsType,
-} from '../../notification/entities/notification.entity'
 import {
   Session,
   type Session as SessionAsType,
@@ -13,9 +8,21 @@ import {
   type Workspace as WorkspaceAsType,
 } from '../../workspace/entities/workspace.entity'
 import {
+  Board,
+  type Board as BoardAsType,
+} from '../../board/entities/board.entity'
+import {
   WorkspaceMember,
   type WorkspaceMember as WorkspaceMemberAsType,
 } from '../../workspaceMember/entities/workspaceMember.entity'
+import {
+  BoardMember,
+  type BoardMember as BoardMemberAsType,
+} from '../../boardMember/entities/boardMember.entity'
+import {
+  Notification,
+  type Notification as NotificationAsType,
+} from '../../notification/entities/notification.entity'
 
 export class User {
   @ApiProperty({
@@ -61,11 +68,23 @@ export class User {
   })
   createdWorkspaces?: WorkspaceAsType[]
   @ApiProperty({
+    type: () => Board,
+    isArray: true,
+    required: false,
+  })
+  createdBoards?: BoardAsType[]
+  @ApiProperty({
     type: () => WorkspaceMember,
     isArray: true,
     required: false,
   })
-  workspacesMembership?: WorkspaceMemberAsType[]
+  workspacesMemberships?: WorkspaceMemberAsType[]
+  @ApiProperty({
+    type: () => BoardMember,
+    isArray: true,
+    required: false,
+  })
+  boardMemberships?: BoardMemberAsType[]
   @ApiProperty({
     type: () => Notification,
     isArray: true,

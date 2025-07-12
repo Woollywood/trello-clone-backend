@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger'
 import { WorkspaceVisibility } from '@prisma/client'
+import { ApiProperty } from '@nestjs/swagger'
 
 export class WorkspaceDto {
   @ApiProperty({

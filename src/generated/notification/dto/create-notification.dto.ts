@@ -1,19 +1,18 @@
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger'
-import { Type } from 'class-transformer'
 import {
   IsNotEmpty,
   IsOptional,
   ValidateNested,
 } from 'class-validator'
-
-import {
-  ConnectUserDto,
-  type ConnectUserDto as ConnectUserDtoAsType,
-} from '../../user/dto/connect-user.dto'
+import { Type } from 'class-transformer'
 import {
   ConnectWorkspaceDto,
   type ConnectWorkspaceDto as ConnectWorkspaceDtoAsType,
 } from '../../workspace/dto/connect-workspace.dto'
+import {
+  ConnectUserDto,
+  type ConnectUserDto as ConnectUserDtoAsType,
+} from '../../user/dto/connect-user.dto'
 
 export class CreateNotificationWorkspaceRelationInputDto {
   @ApiProperty({

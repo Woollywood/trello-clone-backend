@@ -15,7 +15,11 @@ import { ApiResponse } from '@nestjs/swagger'
 import { User } from 'src/auth/decorators/user.decorator'
 import { JwtDto } from 'src/auth/dto/auth.dto'
 import { JwtGuard } from 'src/auth/guards/jwt.guard'
+import { BoardService } from 'src/board/board.service'
+import { PaginatedBoardsDto } from 'src/board/dto/paginated-boards.dto'
 import { PageOptionsDto } from 'src/common/dto/pageOptions.dto'
+import { CreateBoardDto } from 'src/generated/board/dto/create-board.dto'
+import { Board } from 'src/generated/board/entities/board.entity'
 import { Notification } from 'src/generated/notification/entities/notification.entity'
 import { UpdateWorkspaceDto } from 'src/generated/workspace/dto/update-workspace.dto'
 import { Workspace } from 'src/generated/workspace/entities/workspace.entity'
@@ -31,7 +35,10 @@ import { WorkspaceService } from './workspace.service'
 @UseGuards(JwtGuard)
 @Controller('workspace')
 export class WorkspaceController {
-  constructor(private readonly workspaceService: WorkspaceService) {}
+  constructor(
+    private readonly workspaceService: WorkspaceService,
+    private readonly boardService: BoardService
+  ) {}
 
   @ApiResponse({ status: 200, type: Workspace })
   @Get(':id')
@@ -50,6 +57,30 @@ export class WorkspaceController {
     @Body() dto: UpdateWorkspaceDto
   ) {
     return this.workspaceService.updateItemById(sub, id, dto)
+  }
+
+  @ApiResponse({ status: 200, type: PaginatedBoardsDto })
+  @Get(':id/boards')
+  listBoards(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) workspaceId: string,
+    @Query() pageOptions: PageOptionsDto
+  ) {
+    return this.boardService.getWorkspaceBoards(
+      sub,
+      workspaceId,
+      pageOptions
+    )
+  }
+
+  @ApiResponse({ status: 201, type: Board })
+  @Post(':id/boards')
+  createBoard(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) workspaceId: string,
+    @Body() dto: CreateBoardDto
+  ) {
+    return this.workspaceService.createBoard(sub, workspaceId, dto)
   }
 
   @ApiResponse({ status: 200, type: PaginatedWorkspaceMembersDto })
@@ -71,8 +102,6 @@ export class WorkspaceController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() pageOptions: PageOptionsDto
   ) {
-    console.log('users')
-
     return this.workspaceService.listUsers(sub, id, pageOptions)
   }
 

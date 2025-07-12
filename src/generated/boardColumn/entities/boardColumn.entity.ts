@@ -1,10 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger'
 import {
-  User,
-  type User as UserAsType,
-} from '../../user/entities/user.entity'
+  Board,
+  type Board as BoardAsType,
+} from '../../board/entities/board.entity'
+import {
+  Task,
+  type Task as TaskAsType,
+} from '../../task/entities/task.entity'
 
-export class Session {
+export class BoardColumn {
   @ApiProperty({
     type: 'string',
   })
@@ -22,20 +26,20 @@ export class Session {
   @ApiProperty({
     type: 'string',
   })
-  accessToken: string
+  title: string
   @ApiProperty({
-    type: 'string',
-  })
-  refreshToken: string
-  @ApiProperty({
-    type: () => User,
+    type: () => Board,
     required: false,
-    nullable: true,
   })
-  user?: UserAsType | null
+  board?: BoardAsType
   @ApiProperty({
     type: 'string',
-    nullable: true,
   })
-  userId: string | null
+  boardId: string
+  @ApiProperty({
+    type: () => Task,
+    isArray: true,
+    required: false,
+  })
+  tasks?: TaskAsType[]
 }
