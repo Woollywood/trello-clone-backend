@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
+
 import {
   Board,
   type Board as BoardAsType,

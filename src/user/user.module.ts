@@ -1,10 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common'
+import { BoardModule } from 'src/board/board.module'
 import { PrismaModule } from 'src/prisma/prisma.module'
 import { WorkspaceModule } from 'src/workspace/workspace.module'
 
 import { UserController } from './user.controller'
 import { UserService } from './user.service'
-import { BoardModule } from 'src/board/board.module'
 
 @Module({
   imports: [

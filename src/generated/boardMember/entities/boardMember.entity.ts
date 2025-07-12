@@ -1,9 +1,6 @@
-import { BoardRoles } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
-import {
-  User,
-  type User as UserAsType,
-} from '../../user/entities/user.entity'
+import { BoardRoles } from '@prisma/client'
+
 import {
   Board,
   type Board as BoardAsType,
@@ -12,6 +9,10 @@ import {
   Task,
   type Task as TaskAsType,
 } from '../../task/entities/task.entity'
+import {
+  User,
+  type User as UserAsType,
+} from '../../user/entities/user.entity'
 
 export class BoardMember {
   @ApiProperty({

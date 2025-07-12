@@ -1,5 +1,14 @@
-import { BoardVisibility } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
+import { BoardVisibility } from '@prisma/client'
+
+import {
+  BoardColumn,
+  type BoardColumn as BoardColumnAsType,
+} from '../../boardColumn/entities/boardColumn.entity'
+import {
+  BoardMember,
+  type BoardMember as BoardMemberAsType,
+} from '../../boardMember/entities/boardMember.entity'
 import {
   User,
   type User as UserAsType,
@@ -8,14 +17,6 @@ import {
   Workspace,
   type Workspace as WorkspaceAsType,
 } from '../../workspace/entities/workspace.entity'
-import {
-  BoardMember,
-  type BoardMember as BoardMemberAsType,
-} from '../../boardMember/entities/boardMember.entity'
-import {
-  BoardColumn,
-  type BoardColumn as BoardColumnAsType,
-} from '../../boardColumn/entities/boardColumn.entity'
 
 export class Board {
   @ApiProperty({

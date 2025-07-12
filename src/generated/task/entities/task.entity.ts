@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
+
 import {
   BoardColumn,
   type BoardColumn as BoardColumnAsType,

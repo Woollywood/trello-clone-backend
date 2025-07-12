@@ -1,5 +1,14 @@
-import { WorkspaceVisibility } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
+import { WorkspaceVisibility } from '@prisma/client'
+
+import {
+  Board,
+  type Board as BoardAsType,
+} from '../../board/entities/board.entity'
+import {
+  Notification,
+  type Notification as NotificationAsType,
+} from '../../notification/entities/notification.entity'
 import {
   User,
   type User as UserAsType,
@@ -8,14 +17,6 @@ import {
   WorkspaceMember,
   type WorkspaceMember as WorkspaceMemberAsType,
 } from '../../workspaceMember/entities/workspaceMember.entity'
-import {
-  Notification,
-  type Notification as NotificationAsType,
-} from '../../notification/entities/notification.entity'
-import {
-  Board,
-  type Board as BoardAsType,
-} from '../../board/entities/board.entity'
 
 export class Workspace {
   @ApiProperty({

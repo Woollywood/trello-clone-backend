@@ -1,13 +1,14 @@
-import { NotificationType } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger'
-import {
-  Workspace,
-  type Workspace as WorkspaceAsType,
-} from '../../workspace/entities/workspace.entity'
+import { NotificationType } from '@prisma/client'
+
 import {
   User,
   type User as UserAsType,
 } from '../../user/entities/user.entity'
+import {
+  Workspace,
+  type Workspace as WorkspaceAsType,
+} from '../../workspace/entities/workspace.entity'
 
 export class Notification {
   @ApiProperty({
