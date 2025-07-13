@@ -226,7 +226,11 @@ model BoardColumn {
   /// @DtoReadOnly
   updatedAt DateTime @updatedAt
 
+  /// @String
   title String
+
+  /// @Int
+  idx Int @default(autoincrement())
 
   /// @DtoRelationCanConnectOnCreate
   board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
@@ -250,6 +254,9 @@ model Task {
 
   /// @String
   description String?
+
+  /// @Int
+  idx Int @default(autoincrement())
 
   /// @DtoRelationCanConnectOnCreate
   column        BoardColumn @relation(fields: [boardColumnId], references: [id], onDelete: Cascade)

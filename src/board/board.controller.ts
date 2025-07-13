@@ -14,7 +14,15 @@ import { User } from 'src/auth/decorators/user.decorator'
 import { JwtDto } from 'src/auth/dto/auth.dto'
 import { JwtGuard } from 'src/auth/guards/jwt.guard'
 import { BoardColumnService } from 'src/board-column/board-column.service'
+import {
+  ColumnSwapDto,
+  ColumnSwapResponse,
+} from 'src/board-column/dto/columns-swap.dto'
 import { BoardTaskService } from 'src/board-task/board-task.service'
+import {
+  TaskSwapDto,
+  TaskSwapResponse,
+} from 'src/board-task/dto/task-swap.dto'
 import { CreateBoardDto } from 'src/generated/board/dto/create-board.dto'
 import { Board } from 'src/generated/board/entities/board.entity'
 import { CreateBoardColumnDto } from 'src/generated/boardColumn/dto/create-boardColumn.dto'
@@ -119,5 +127,35 @@ export class BoardController {
     @Body() dto: UpdateTaskDto
   ) {
     return this.boardTaskService.updateTask(sub, boardId, taskId, dto)
+  }
+
+  @ApiResponse({ status: 201, type: Task })
+  @Delete(':id/task/:taskId')
+  deleteTask(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) boardId: string,
+    @Param('taskId', ParseUUIDPipe) taskId: string
+  ) {
+    return this.boardTaskService.deleteTask(sub, boardId, taskId)
+  }
+
+  @ApiResponse({ status: 200, type: ColumnSwapResponse })
+  @Patch(':id/swap/columns')
+  swapColumns(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) boardId: string,
+    @Body() dto: ColumnSwapDto
+  ) {
+    return this.boardColumnService.swapColumns(sub, boardId, dto)
+  }
+
+  @ApiResponse({ status: 200, type: TaskSwapResponse })
+  @Patch(':id/swap/tasks')
+  swapTasks(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) boardId: string,
+    @Body() dto: TaskSwapDto
+  ) {
+    return this.boardTaskService.swapTasks(sub, boardId, dto)
   }
 }

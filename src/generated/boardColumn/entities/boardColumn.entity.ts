@@ -29,6 +29,11 @@ export class BoardColumn {
   })
   title: string
   @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+  })
+  idx: number
+  @ApiProperty({
     type: () => Board,
     required: false,
   })

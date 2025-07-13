@@ -19,4 +19,9 @@ export class BoardColumnDto {
     type: 'string',
   })
   title: string
+  @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+  })
+  idx: number
 }

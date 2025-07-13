@@ -34,6 +34,11 @@ export class Task {
   })
   description: string | null
   @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+  })
+  idx: number
+  @ApiProperty({
     type: () => BoardColumn,
     required: false,
   })

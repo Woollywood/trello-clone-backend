@@ -24,4 +24,9 @@ export class TaskDto {
     nullable: true,
   })
   description: string | null
+  @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+  })
+  idx: number
 }
