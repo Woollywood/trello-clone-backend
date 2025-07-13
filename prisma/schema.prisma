@@ -228,6 +228,7 @@ model BoardColumn {
 
   title String
 
+  /// @DtoRelationCanConnectOnCreate
   board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
   boardId String
 
@@ -244,9 +245,13 @@ model Task {
   /// @DtoReadOnly
   updatedAt DateTime @updatedAt
 
-  title       String
+  /// @String
+  title String
+
+  /// @String
   description String?
 
+  /// @DtoRelationCanConnectOnCreate
   column        BoardColumn @relation(fields: [boardColumnId], references: [id], onDelete: Cascade)
   boardColumnId String
 

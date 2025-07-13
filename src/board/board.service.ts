@@ -33,6 +33,12 @@ export class BoardService {
   async getBoardById(userId: string, boardId: string) {
     const board = await this.prismaService.board.findUnique({
       where: { id: boardId },
+      include: {
+        boardColumns: {
+          include: { tasks: { orderBy: { createdAt: 'asc' } } },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
     })
 
     if (!board) {
