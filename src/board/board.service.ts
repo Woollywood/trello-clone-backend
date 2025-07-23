@@ -35,8 +35,8 @@ export class BoardService {
       where: { id: boardId },
       include: {
         boardColumns: {
-          include: { tasks: { orderBy: { idx: 'asc' } } },
           orderBy: { idx: 'asc' },
+          include: { tasks: { orderBy: { idx: 'asc' } } },
         },
       },
     })

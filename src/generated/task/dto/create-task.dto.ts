@@ -8,10 +8,23 @@ import {
 } from 'class-validator'
 
 import {
+  ConnectBoardDto,
+  type ConnectBoardDto as ConnectBoardDtoAsType,
+} from '../../board/dto/connect-board.dto'
+import {
   ConnectBoardColumnDto,
   type ConnectBoardColumnDto as ConnectBoardColumnDtoAsType,
 } from '../../boardColumn/dto/connect-boardColumn.dto'
 
+export class CreateTaskBoardRelationInputDto {
+  @ApiProperty({
+    type: ConnectBoardDto,
+  })
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => ConnectBoardDto)
+  connect: ConnectBoardDtoAsType
+}
 export class CreateTaskColumnRelationInputDto {
   @ApiProperty({
     type: ConnectBoardColumnDto,
@@ -23,6 +36,8 @@ export class CreateTaskColumnRelationInputDto {
 }
 
 @ApiExtraModels(
+  ConnectBoardDto,
+  CreateTaskBoardRelationInputDto,
   ConnectBoardColumnDto,
   CreateTaskColumnRelationInputDto
 )
@@ -41,6 +56,13 @@ export class CreateTaskDto {
   @IsOptional()
   @IsString()
   description?: string | null
+  @ApiProperty({
+    type: CreateTaskBoardRelationInputDto,
+  })
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => CreateTaskBoardRelationInputDto)
+  board: CreateTaskBoardRelationInputDto
   @ApiProperty({
     type: CreateTaskColumnRelationInputDto,
   })

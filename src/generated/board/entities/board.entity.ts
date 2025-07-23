@@ -10,6 +10,10 @@ import {
   type BoardMember as BoardMemberAsType,
 } from '../../boardMember/entities/boardMember.entity'
 import {
+  Task,
+  type Task as TaskAsType,
+} from '../../task/entities/task.entity'
+import {
   User,
   type User as UserAsType,
 } from '../../user/entities/user.entity'
@@ -74,4 +78,10 @@ export class Board {
     required: false,
   })
   boardColumns?: BoardColumnAsType[]
+  @ApiProperty({
+    type: () => Task,
+    isArray: true,
+    required: false,
+  })
+  tasks?: TaskAsType[]
 }

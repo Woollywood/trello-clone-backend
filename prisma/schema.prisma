@@ -190,6 +190,7 @@ model Board {
 
   boardMembers BoardMember[]
   boardColumns BoardColumn[]
+  tasks        Task[]
 }
 
 model BoardMember {
@@ -257,6 +258,10 @@ model Task {
 
   /// @Int
   idx Int @default(autoincrement())
+
+  /// @DtoRelationCanConnectOnCreate
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId String
 
   /// @DtoRelationCanConnectOnCreate
   column        BoardColumn @relation(fields: [boardColumnId], references: [id], onDelete: Cascade)

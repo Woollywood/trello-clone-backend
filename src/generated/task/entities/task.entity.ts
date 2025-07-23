@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger'
 
 import {
+  Board,
+  type Board as BoardAsType,
+} from '../../board/entities/board.entity'
+import {
   BoardColumn,
   type BoardColumn as BoardColumnAsType,
 } from '../../boardColumn/entities/boardColumn.entity'
@@ -38,6 +42,15 @@ export class Task {
     format: 'int32',
   })
   idx: number
+  @ApiProperty({
+    type: () => Board,
+    required: false,
+  })
+  board?: BoardAsType
+  @ApiProperty({
+    type: 'string',
+  })
+  boardId: string
   @ApiProperty({
     type: () => BoardColumn,
     required: false,

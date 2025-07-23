@@ -1,20 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsUUID } from 'class-validator'
-import { Task } from 'src/generated/task/entities/task.entity'
+import { IsOptional, IsUUID } from 'class-validator'
 
 export class TaskSwapDto {
   @ApiProperty()
   @IsUUID()
   srcId: string
 
+  @ApiProperty({ required: false })
+  @IsUUID()
+  @IsOptional()
+  destId?: string
+
   @ApiProperty()
   @IsUUID()
-  destId: string
-}
-
-export class TaskSwapResponse {
-  @ApiProperty()
-  src: Task
-  @ApiProperty()
-  dest: Task
+  destColumnId: string
 }

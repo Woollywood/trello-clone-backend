@@ -13,10 +13,7 @@ import { CreateBoardColumnDto } from 'src/generated/boardColumn/dto/create-board
 import { UpdateBoardColumnDto } from 'src/generated/boardColumn/dto/update-boardColumn.dto'
 import { PrismaService } from 'src/prisma/prisma.service'
 
-import {
-  ColumnSwapDto,
-  ColumnSwapResponse,
-} from './dto/columns-swap.dto'
+import { ColumnSwapDto } from './dto/columns-swap.dto'
 
 @Injectable()
 export class BoardColumnService {
@@ -108,9 +105,10 @@ export class BoardColumnService {
     userId: string,
     boardId: string,
     { srcId, destId }: ColumnSwapDto
-  ): Promise<ColumnSwapResponse> {
+  ) {
     const board = await this.prismaService.board.findUnique({
       where: { id: boardId },
+      include: { boardColumns: true },
     })
 
     if (!board) {
@@ -134,17 +132,31 @@ export class BoardColumnService {
       if (!srcColumn || !destColumn) {
         throw new BadRequestException()
       }
-      const [src, dest] = await Promise.all([
+      const isLeft = destColumn.idx < srcColumn.idx
+
+      const transaction = [
+        ...board.boardColumns
+          .filter(
+            ({ id, idx }) =>
+              id !== srcColumn.id &&
+              (isLeft
+                ? idx >= destColumn.idx && idx < srcColumn.idx
+                : idx > srcColumn.idx && idx <= destColumn.idx)
+          )
+          .map(({ id, idx: oldIdx }) =>
+            this.prismaService.boardColumn.update({
+              where: { id },
+              data: { idx: isLeft ? oldIdx + 1 : oldIdx - 1 },
+            })
+          ),
         this.prismaService.boardColumn.update({
-          where: srcColumn,
-          data: { idx: destColumn.idx },
+          where: { id: srcColumn.id },
+          data: {
+            idx: destColumn.idx,
+          },
         }),
-        this.prismaService.boardColumn.update({
-          where: destColumn,
-          data: { idx: srcColumn.idx },
-        }),
-      ])
-      return { src, dest }
+      ]
+      return this.prismaService.$transaction(transaction)
     } else {
       throw new ForbiddenException()
     }

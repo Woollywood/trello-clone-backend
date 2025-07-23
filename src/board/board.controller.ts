@@ -14,15 +14,9 @@ import { User } from 'src/auth/decorators/user.decorator'
 import { JwtDto } from 'src/auth/dto/auth.dto'
 import { JwtGuard } from 'src/auth/guards/jwt.guard'
 import { BoardColumnService } from 'src/board-column/board-column.service'
-import {
-  ColumnSwapDto,
-  ColumnSwapResponse,
-} from 'src/board-column/dto/columns-swap.dto'
+import { ColumnSwapDto } from 'src/board-column/dto/columns-swap.dto'
 import { BoardTaskService } from 'src/board-task/board-task.service'
-import {
-  TaskSwapDto,
-  TaskSwapResponse,
-} from 'src/board-task/dto/task-swap.dto'
+import { TaskSwapDto } from 'src/board-task/dto/task-swap.dto'
 import { CreateBoardDto } from 'src/generated/board/dto/create-board.dto'
 import { Board } from 'src/generated/board/entities/board.entity'
 import { CreateBoardColumnDto } from 'src/generated/boardColumn/dto/create-boardColumn.dto'
@@ -99,7 +93,7 @@ export class BoardController {
   }
 
   @ApiResponse({ status: 201, type: Task })
-  @Post(':id/task')
+  @Post(':id/tasks')
   createTask(
     @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) boardId: string,
@@ -108,8 +102,17 @@ export class BoardController {
     return this.boardTaskService.createTask(sub, boardId, dto)
   }
 
-  @ApiResponse({ status: 201, type: Task })
-  @Get(':id/task/:taskId')
+  @ApiResponse({ status: 200, type: [Task] })
+  @Get(':id/tasks')
+  getTasks(
+    @User() { sub }: JwtDto,
+    @Param('id', ParseUUIDPipe) boardId: string
+  ) {
+    return this.boardTaskService.getTasks(sub, boardId)
+  }
+
+  @ApiResponse({ status: 200, type: Task })
+  @Get(':id/tasks/:taskId')
   getTask(
     @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) boardId: string,
@@ -119,7 +122,7 @@ export class BoardController {
   }
 
   @ApiResponse({ status: 201, type: Task })
-  @Patch(':id/task/:taskId')
+  @Patch(':id/tasks/:taskId')
   updateTask(
     @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) boardId: string,
@@ -130,7 +133,7 @@ export class BoardController {
   }
 
   @ApiResponse({ status: 201, type: Task })
-  @Delete(':id/task/:taskId')
+  @Delete(':id/tasks/:taskId')
   deleteTask(
     @User() { sub }: JwtDto,
     @Param('id', ParseUUIDPipe) boardId: string,
@@ -139,7 +142,7 @@ export class BoardController {
     return this.boardTaskService.deleteTask(sub, boardId, taskId)
   }
 
-  @ApiResponse({ status: 200, type: ColumnSwapResponse })
+  @ApiResponse({ status: 200, type: Board })
   @Patch(':id/swap/columns')
   swapColumns(
     @User() { sub }: JwtDto,
@@ -149,7 +152,7 @@ export class BoardController {
     return this.boardColumnService.swapColumns(sub, boardId, dto)
   }
 
-  @ApiResponse({ status: 200, type: TaskSwapResponse })
+  @ApiResponse({ status: 200, type: BoardColumn })
   @Patch(':id/swap/tasks')
   swapTasks(
     @User() { sub }: JwtDto,
